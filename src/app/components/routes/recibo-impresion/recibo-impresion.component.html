@@ -1,0 +1,95 @@
+<div class="cargando-pantalla" *ngIf="cargando">
+  <h2>Generando Recibo...</h2>
+</div>
+
+<div class="hoja-impresion" *ngIf="!cargando">
+  <button class="btn-volver no-imprimir" (click)="router.navigate(['/dashboard'])">
+    ⬅ Volver al Tablero
+  </button>
+
+  <header class="recibo-header">
+    <div class="datos-empresa">
+      <h1>RepairTec</h1>
+      <p><strong>Sucursal Centro Culiacán</strong></p>
+      <p>Av. Álvaro Obregón #145 Sur, Col. Centro</p>
+      <p>Teléfono: (667) 712-3456</p>
+      <div class="redes-sociales">
+        <span>🔵 fb.com/RepairTecOficial</span> | <span><span>📸 &#64;RepairTec.cln</span></span>
+      </div>
+    </div>
+    
+    <div class="datos-ticket">
+      <div class="caja-ticket">
+        <h3>Orden de Servicio</h3>
+        <div class="numero-folio">#{{ orden.id | number:'3.0' }}</div>
+        <div class="fecha-info">
+          Fecha: {{ orden.fechaIngreso | date:'dd/MM/yyyy HH:mm' }}
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section class="seccion-datos">
+    <div class="titulo-seccion">Datos del Cliente</div>
+    <table class="tabla-datos">
+      <tr>
+        <th>Cliente:</th>
+        <td>{{ orden.nombreCliente }}</td>
+        <th>Teléfono:</th>
+        <td>{{ orden.telefonoCliente }}</td>
+      </tr>
+    </table>
+  </section>
+
+  <section class="seccion-datos">
+    <div class="titulo-seccion">Detalles del Equipo y Diagnóstico</div>
+    <table class="tabla-datos">
+      <tr>
+        <th>Equipo:</th>
+        <td colspan="3">{{ orden.equipoDetalle }}</td>
+      </tr>
+      <tr>
+        <th>Falla Reportada:</th>
+        <td colspan="3">{{ orden.fallaReportada }}</td>
+      </tr>
+    </table>
+  </section>
+
+  <section class="seccion-datos">
+    <div class="titulo-seccion">Presupuesto</div>
+    <table class="tabla-finanzas">
+      <tr>
+        <td class="etiqueta">Costo Estimado:</td>
+        <td class="monto">${{ orden.costoEstimado | number:'1.2-2' }}</td>
+      </tr>
+      <tr>
+        <td class="etiqueta">Anticipo Recibido:</td>
+        <td class="monto text-danger">- ${{ orden.anticipo | number:'1.2-2' }}</td>
+      </tr>
+      <tr class="fila-total">
+        <td class="etiqueta"><strong>Restante a Pagar a la Entrega:</strong></td>
+        <td class="monto-total text-success">${{ calcularRestante() | number:'1.2-2' }}</td>
+      </tr>
+    </table>
+  </section>
+
+  <div class="caja-terminos">
+    <h4>Términos y Políticas</h4>
+    <ul>
+      <li><strong>Garantía:</strong> 30 días de garantía sobre la reparación o pieza instalada. No aplica en equipos mojados, golpeados o con sellos rotos.</li>
+      <li><strong>Abandono:</strong> Después de 60 días de notificada la reparación, el equipo pasará a ser propiedad del taller para cubrir gastos.</li>
+      <li>El anticipo cubre revisión y no es reembolsable.</li>
+    </ul>
+  </div>
+
+  <div class="zona-firmas">
+    <div class="firma">
+      <div class="linea"></div>
+      <p>Firma de Conformidad Cliente</p>
+    </div>
+    <div class="firma">
+      <div class="linea"></div>
+      <p>Sello / Firma RepairTec</p>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,14 @@
+
+<li
+    *ngFor="let menuItem of menuItems"
+    [class]="getItemClass(menuItem)"
+    (click)="handleClickItem(menuItem)"
+>
+    <i [class]="getIconClass(menuItem.icon)" *ngIf="indexSubMenu === undefined"></i>
+    <span class="menuItemTitle">{{ menuItem.title }}</span>
+    <app-svg 
+        *ngIf="menuItem&&menuItem.items&&menuItem.items.length > 0" 
+        [path]="ArrowRightIconPath" 
+        [fillColor]="'#2881b3'"
+    />
+</li>

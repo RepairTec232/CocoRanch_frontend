@@ -1,0 +1,17 @@
+<div *ngIf="fullName !== undefined && image === undefined">
+    <p-avatar
+      [label]="getInitials()"
+      styleClass="mr-2"
+      size="large"
+      shape="circle"
+    ></p-avatar>
+</div>
+
+<div *ngIf="image !== undefined">
+    <p-avatar
+        [image]="image"
+        styleClass="mr-2"
+        size="large"
+        shape="circle"
+    ></p-avatar>
+</div>

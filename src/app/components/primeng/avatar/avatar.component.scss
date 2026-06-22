@@ -1,0 +1,12 @@
+::ng-deep {
+    .p-avatar {
+        background-color: var(--complementary);
+        padding: var(--s-unit-3);
+        .p-avatar-text {
+            font-size: 14px !important;
+            font-family: 'Helvetica Neue', Helvetica, sans-serif;
+            color: var(--primary);
+            font-weight: bold;
+        }
+    }
+}

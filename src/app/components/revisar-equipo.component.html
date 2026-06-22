@@ -1,0 +1,62 @@
+<div class="container mt-5" *ngIf="!cargando">
+  <div class="card shadow">
+    <div class="card-header bg-dark text-white">
+      <h3 class="m-0">⚙️ Revisión de Orden #{{ ordenId }}</h3>
+    </div>
+    <div class="card-body">
+      <form [formGroup]="reparacionForm" (ngSubmit)="guardarCambios()">
+        
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Cliente</label>
+            <input type="text" class="form-control" formControlName="nombreCliente">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Equipo</label>
+            <input type="text" class="form-control" formControlName="equipoDetalle">
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-bold">Falla Reportada Inicial</label>
+          <textarea class="form-control" rows="2" formControlName="fallaReportada"></textarea>
+        </div>
+
+        <hr>
+
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label class="form-label fw-bold text-primary">🔴 Estatus de Reparación</label>
+            <select class="form-select border-primary" formControlName="estado">
+              <option *ngFor="let estatus of listaEstatus" [value]="estatus">
+                {{ estatus }}
+              </option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Costo de Reparación ($)</label>
+            <input type="number" class="form-control" formControlName="costoTotal">
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label fw-bold">Diagnóstico Técnico / Notas de Reparación</label>
+          <textarea class="form-control" rows="3" placeholder="Escribe qué le encontraste al equipo o qué refacción requiere..." formControlName="diagnosticoTecnico"></textarea>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2">
+          <button type="button" class="btn btn-secondary" (click)="cancelar()">Cancelar</button>
+          <button type="submit" class="btn btn-success" [disabled]="reparacionForm.invalid">
+            Guardar Actualización
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="cargando" class="text-center my-5">
+  <div class="spinner-border text-primary" role="status"></div>
+  <p class="mt-2 text-muted">Buscando expediente del equipo...</p>
+</div>

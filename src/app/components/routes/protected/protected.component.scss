@@ -1,0 +1,14 @@
+
+.element-container{
+    width: 100%;
+    display:flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 10px;
+    padding: 20px;
+}
+.justify-text-end{
+    display: flex;
+    justify-content: flex-end;
+    text-align: end;
+}

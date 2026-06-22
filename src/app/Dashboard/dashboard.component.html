@@ -1,0 +1,131 @@
+<div class="container mt-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-tools"></i> Tablero de Reparaciones</h2>
+    <button class="btn btn-primary" (click)="abrirNuevaReparacion()">
+      + Nueva Reparación
+    </button>
+  </div>
+
+  <div class="row mb-3" *ngIf="ordenes.length > 0">
+    <div class="col-md-6">
+      <div class="input-group shadow-sm rounded">
+        <span class="input-group-text bg-white border-end-0">
+          <i class="bi bi-search text-muted">🔍</i>
+        </span>
+        <input
+          type="text"
+          class="form-control border-start-0"
+          placeholder="Buscar por cliente, teléfono o equipo..."
+          [(ngModel)]="terminoBusqueda"
+          (input)="filtrarTablero()"
+        />
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <div *ngIf="cargando" class="text-center my-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Cargando...</span>
+        </div>
+        <p class="mt-2 text-muted">Cargando datos del taller...</p>
+      </div>
+
+      <div
+        class="table-responsive"
+        *ngIf="!cargando && ordenesFiltradas.length > 0"
+      >
+        <table class="table table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Folio</th>
+              <th>Fecha Ingreso</th>
+              <th>Cliente</th>
+              <th>Equipo</th>
+              <th>Falla Reportada</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let orden of ordenesFiltradas">
+              <td>
+                <strong>#{{ orden.id }}</strong>
+              </td>
+              <td class="text-muted">
+                {{ orden.fechaIngreso | date: "dd/MM/yyyy HH:mm" }}
+              </td>
+              <td>
+                {{ orden.nombreCliente }}<br />
+                <small class="text-muted">{{ orden.telefonoCliente }}</small>
+              </td>
+              <td>{{ orden.equipoDetalle }}</td>
+              <td>
+                <span
+                  class="text-truncate d-inline-block"
+                  style="max-width: 200px"
+                  >{{ orden.fallaReportada }}</span
+                >
+              </td>
+              <td>
+                <span
+                  class="badge"
+                  [ngClass]="{
+                    'bg-success':
+                      orden.estado === 'RECIBIDO' ||
+                      orden.estado === 'ENTREGADO',
+                    'bg-warning text-dark':
+                      orden.estado === 'EN_REVISION' ||
+                      orden.estado === 'ESPERANDO_REPUESTO',
+                    'bg-info text-dark': orden.estado === 'REPARADO',
+                  }"
+                >
+                  {{ orden.estado }}
+                </span>
+              </td>
+              <td class="text-nowrap">
+                <div class="d-flex align-items-center gap-2 flex-nowrap">
+                  <button
+                    class="btn btn-outline-info btn-sm"
+                    [routerLink]="['/revisar-equipo', orden.id]"
+                  >
+                    Revisar
+                  </button>
+
+                  <button
+                    class="btn btn-outline-danger btn-sm"
+                    (click)="eliminarOrden(orden.id)"
+                  >
+                    Borrar
+                  </button>
+
+                  <button
+                    class="btn btn-outline-secondary btn-sm"
+                    [routerLink]="['/recibo', orden.id]"
+                    title="Imprimir Recibo"
+                  >
+                    <i class="pi pi-print"></i> Imprimir
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div *ngIf="!cargando && ordenes.length === 0" class="text-center my-5">
+        <h5 class="text-muted">No hay reparaciones active s</h5>
+        <p class="text-muted">Los equipos que ingreses aparecerán aquí.</p>
+      </div>
+
+      <div
+        *ngIf="!cargando && ordenes.length > 0 && ordenesFiltradas.length === 0"
+        class="text-center my-5 text-muted"
+      >
+        <h5>🚫 No se encontraron coincidencias</h5>
+        <p>Intenta buscando con otros términos.</p>
+      </div>
+    </div>
+  </div>
+</div>

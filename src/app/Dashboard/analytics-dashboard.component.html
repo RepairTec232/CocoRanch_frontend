@@ -1,0 +1,122 @@
+<div class="container-fluid py-4" *ngIf="!cargando">
+  <h2 class="mb-4">📊 Panel Estadístico Mensual</h2>
+
+  <div class="row mb-4">
+    <div class="col-md-3">
+      <div class="card bg-success text-white shadow-sm">
+        <div class="card-body">
+          <h6>💰 Ganancias del Mes</h6>
+          <h3>${{ stats.gananciasMes | number: "1.2-2" }}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card bg-secondary text-white shadow-sm">
+        <div class="card-body">
+          <h6>⏳ Equipos Pendientes</h6>
+          <h3>{{ stats.totalPendientes }}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card bg-warning text-dark shadow-sm">
+        <div class="card-body">
+          <h6>⚙️ En Revisión</h6>
+          <h3>{{ stats.totalEnRevision }}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card bg-primary text-white shadow-sm">
+        <div class="card-body">
+          <h6>✅ Entregados/Reparados</h6>
+          <h3>{{ stats.totalEntregados }}</h3>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mb-4">
+    <div class="col-md-6">
+      <div class="card p-3 shadow-sm">
+        <h5>📈 Distribución de Estados de Trabajo</h5>
+        <apx-chart
+          [series]="chartOptions.series"
+          [chart]="chartOptions.chart"
+          [labels]="chartOptions.labels"
+          [colors]="chartOptions.colors"
+        >
+        </apx-chart>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card p-3 shadow-sm h-100">
+        <h5>🔔 Alertas del Taller</h5>
+        <p class="text-muted">
+          Tienes {{ stats.totalPendientes }} teléfonos esperando diagnóstico
+          técnico en la fila.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm">
+    <div
+      class="card-header bg-dark text-white d-flex justify-content-between align-items-center"
+    >
+      <h5 class="mb-0">📋 Teléfonos Listos (Faltantes por Entregar)</h5>
+      <span class="badge bg-danger"
+        >{{ listaFaltantes.length }} Equipos en espera</span
+      >
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th style="width: 10%">Folio</th>
+              <th style="width: 20%">Cliente</th>
+              <th style="width: 15%">Teléfono</th>
+              <th style="width: 20%">Equipo</th>
+              <th style="width: 20%">Falla Solucionada</th>
+              <th style="width: 15%">Costo Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let orden of listaFaltantes">
+              <td>
+                <strong>#{{ orden.id }}</strong>
+              </td>
+              <td>{{ orden.nombreCliente }}</td>
+              <td>
+                <a
+                  [href]="getWhatsAppLink(orden.telefonoCliente)"
+                  target="_blank"
+                  class="btn btn-sm btn-outline-success fw-bold d-inline-flex align-items-center gap-1"
+                >
+                  <i class="pi pi-whatsapp"></i> Mandar WhatsApp
+                </a>
+              </td>
+              <td>{{ orden.equipoDetalle }}</td>
+              <td>{{ orden.fallaReportada }}</td>
+              <td class="text-primary fw-bold">
+                ${{ orden.costoTotal | number: "1.2-2" }}
+              </td>
+            </tr>
+            <tr *ngIf="listaFaltantes.length === 0">
+              <td colspan="6" class="text-center py-4 text-muted">
+                🎉 ¡Excelente! No hay equipos reparados pendientes de entrega.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="cargando" class="text-center my-5">
+  <div class="spinner-border text-primary" role="status"></div>
+  <p class="mt-2 text-muted">Construyendo gráficos de rendimiento del mes...</p>
+</div>
