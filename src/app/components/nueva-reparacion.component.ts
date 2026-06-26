@@ -3,10 +3,12 @@ import { CommonModule } from '@angular/common';
 import {
   FormBuilder,
   FormGroup,
+  FormArray, // 👈 IMPORTANTE: Agregamos FormArray
   Validators,
   ReactiveFormsModule,
 } from '@angular/forms';
-import { ReparacionesService } from '../services/reparaciones.service'; // Nuestro servicio
+import { ReparacionesService } from '../services/reparaciones.service';
+import { RefaccionesService } from '../services/refacciones.service'; // 👈 IMPORTAMOS EL CATÁLOGO
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { Router, RouterModule } from '@angular/router';
@@ -20,129 +22,255 @@ import { Router, RouterModule } from '@angular/router';
 })
 export class NuevaReparacionComponent implements OnInit {
   reparacionForm!: FormGroup;
-  clienteExiste: boolean = false;
-  cargandoCliente: boolean = false;
-  clienteIdActual: number | null = null; // 👈 Guardamos el ID si el cliente ya existe
+  clienteExiste = false;
+  cargandoCliente = false;
+  clienteIdActual: number | null = null;
+
+  // 📦 Variables para el Catálogo Inteligente
+  catalogoCompleto: any[] = [];
+  marcasUnicas: string[] = [];
+  modelosUnicos: string[] = [];
+
+  historialCliente: any[] = [];
 
   constructor(
     private fb: FormBuilder,
     private reparacionesService: ReparacionesService,
+    private refaccionesService: RefaccionesService, // Inyectamos servicio
     private http: HttpClient,
     private router: Router,
   ) {}
 
   ngOnInit(): void {
     this.inicializarFormulario();
+    this.cargarCatalogo();
   }
 
   inicializarFormulario(): void {
     this.reparacionForm = this.fb.group({
-      // Datos del Cliente
-      telefono: ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]], // 10 dígitos
+      telefono: ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]],
       nombreCompleto: ['', Validators.required],
-      email: ['', Validators.email],
-
-      // Datos del Equipo
       tipoEquipo: ['CELULAR', Validators.required],
       marca: ['', Validators.required],
       modelo: ['', Validators.required],
       numeroSerie: [''],
 
-      // Detalle de la Orden
-      fallaReportada: ['', Validators.required],
-      costoEstimado: [0, [Validators.required, Validators.min(0)]],
-      anticipo: [0, [Validators.min(0)]]
+      // 🔥 EL CORAZÓN DEL COTIZADOR (Arreglo dinámico)
+      detalles: this.fb.array([]),
+
+      costoEstimado: ['', [Validators.required, Validators.min(0)]],
+      anticipo: ['', [Validators.min(0)]],
+    });
+
+    // Escuchar cuando el usuario escriba la Marca para filtrar los Modelos
+    this.reparacionForm
+      .get('marca')
+      ?.valueChanges.subscribe((marcaSeleccionada) => {
+        this.modelosUnicos = [
+          ...new Set(
+            this.catalogoCompleto
+              .filter(
+                (r) =>
+                  r.marca.toLowerCase() === marcaSeleccionada.toLowerCase(),
+              )
+              .map((r) => r.modelo),
+          ),
+        ];
+      });
+
+    // Agregamos una fila vacía por defecto al iniciar
+    this.agregarDetalle();
+  }
+
+  // 📦 Cargar catálogo desde Spring Boot
+  cargarCatalogo(): void {
+    this.refaccionesService.obtenerTodas().subscribe((data) => {
+      this.catalogoCompleto = data;
+      // Extraemos marcas sin repetir
+      this.marcasUnicas = [...new Set(data.map((item) => item.marca))];
     });
   }
 
-  // LÓGICA DE SENIOR: Buscar cliente por WhatsApp/Teléfono al perder el foco (evento blur)
-  buscarCliente(): void {
-    const telefono = this.reparacionForm.get('telefono')?.value;
+  // 🔄 Obtener las opciones de fallas SOLO para la marca y modelo escritos
+  get refaccionesDelModeloActual() {
+    const marca = this.reparacionForm.get('marca')?.value;
+    const modelo = this.reparacionForm.get('modelo')?.value;
+    return this.catalogoCompleto.filter(
+      (r) =>
+        r.marca.toLowerCase() === marca?.toLowerCase() &&
+        r.modelo.toLowerCase() === modelo?.toLowerCase(),
+    );
+  }
 
-    if (!telefono || telefono.length !== 10) return;
+  // ==========================================
+  // 🔥 LÓGICA DEL FORM ARRAY (MÚLTIPLES FALLAS)
+  // ==========================================
+  get detalles(): FormArray {
+    return this.reparacionForm.get('detalles') as FormArray;
+  }
 
+  agregarDetalle(): void {
+    const fila = this.fb.group({
+      esCatalogo: [true],
+      refaccionId: [''],
+      descripcionManual: [''],
+      cantidad: [1, [Validators.required, Validators.min(1)]],
+
+      // 🔄 CORREGIDO: Cambiamos 0 por '' para que aparezca limpio de inicio
+      precioUnitario: ['', [Validators.required, Validators.min(0)]],
+    });
+
+    // Tus suscripciones de abajo se quedan exactamente igual...
+    fila.get('refaccionId')?.valueChanges.subscribe((idSeleccionado) => {
+      if (idSeleccionado) {
+        const producto = this.catalogoCompleto.find(
+          (r) => r.id == idSeleccionado,
+        );
+        if (producto) {
+          fila.patchValue(
+            { precioUnitario: producto.precioTotalCliente },
+            { emitEvent: false },
+          );
+          this.recalcularTotal();
+        }
+      }
+    });
+
+    fila.get('cantidad')?.valueChanges.subscribe(() => this.recalcularTotal());
+    fila
+      .get('precioUnitario')
+      ?.valueChanges.subscribe(() => this.recalcularTotal());
+
+    this.detalles.push(fila);
+  }
+
+  removerDetalle(index: number): void {
+    if (this.detalles.length > 1) {
+      this.detalles.removeAt(index);
+      this.recalcularTotal();
+    }
+  }
+
+  recalcularTotal(): void {
+    let granTotal = 0;
+    this.detalles.controls.forEach((fila) => {
+      const cant = fila.get('cantidad')?.value || 0;
+      const precio = fila.get('precioUnitario')?.value || 0;
+      granTotal += cant * precio;
+    });
+    this.reparacionForm.patchValue({ costoEstimado: granTotal });
+  }
+
+  // Resto del código (buscarCliente, etc)...
+buscarCliente(): void {
+    // 🎤 1. Revisamos qué nombre de control estás usando
+    const telefono = this.reparacionForm.get('telefonoCliente')?.value; // Cambia esto si tu form usa 'telefono'
+    
+    console.log('👀 1. Di clic fuera de la cajita. Teléfono leído:', telefono);
+
+    if (!telefono) {
+      console.log('❌ 2. El teléfono está vacío o no lo encontró en el formulario.');
+      return;
+    }
+
+    if (telefono.length !== 10) {
+      console.log('❌ 2. El teléfono no tiene 10 dígitos. Tiene:', telefono.length);
+      return;
+    }
+
+    console.log('✅ 3. El teléfono es válido. Yendo a buscar a Java...');
     this.cargandoCliente = true;
+    this.historialCliente = []; 
 
     this.http
       .get<any>(`${environment.apiUrl}/clientes/telefono/${telefono}`)
       .subscribe({
         next: (cliente) => {
+          console.log('📥 4. Java respondió con éxito:', cliente);
           if (cliente) {
             this.clienteExiste = true;
-            this.clienteIdActual = cliente.id; // 👈 Guardamos el ID original de la BD
-
+            this.clienteIdActual = cliente.id; 
             this.reparacionForm.patchValue({
               nombreCompleto: cliente.nombreCompleto,
-              email: cliente.email,
             });
+            console.log('✅ 5. Cliente encontrado. Buscando historial...');
+            this.cargarHistorialCliente(cliente.id);
+          } else {
+            console.log('👤 5. Es un cliente nuevo (Java mandó null).');
+            this.clienteExiste = false;
+            this.clienteIdActual = null;
           }
           this.cargandoCliente = false;
         },
         error: (err) => {
-          // Si da 404, limpiamos el ID ya que es un cliente totalmente nuevo
+          console.error('🚨 4. ¡ERROR DE CONEXIÓN O DE ANGULAR!', err);
           this.clienteExiste = false;
           this.clienteIdActual = null;
           this.cargandoCliente = false;
         },
       });
   }
+  
+  cargarHistorialCliente(clienteId: number): void {
+    this.http
+      .get<any[]>(`${environment.apiUrl}/api/ordenes/cliente/${clienteId}`) // Ajusta la ruta exacta de tu Java
+      .subscribe({
+        next: (historial) => {
+          this.historialCliente = historial;
+        },
+        error: (err) =>
+          console.error('Error al traer el historial del cliente', err),
+      });
+  }
 
   guardar(): void {
-    console.log('🚨 ¡El botón verde sí fue presionado!');
-
     if (this.reparacionForm.invalid) {
       this.reparacionForm.markAllAsTouched();
-      console.warn('Faltan campos obligatorios por llenar');
       return;
     }
 
     const formValues = this.reparacionForm.value;
 
-    const objetoCliente = {
-      id: this.clienteIdActual,
-      telefono: formValues.telefono,
-      nombreCompleto: formValues.nombreCompleto,
-      email: formValues.email,
-    };
+    // 🔨 CONVERTIMOS LA LISTA DINÁMICA EN TEXTO PARA EL BACKEND
+    // 🔨 AHORA GUARDAMOS: "1x Pantalla (Incell) [$800.00]"
+    const textoFallas = formValues.detalles
+      .map((d: any) => {
+        let nombre = '';
+        if (d.esCatalogo && d.refaccionId) {
+          const prod = this.catalogoCompleto.find((r) => r.id == d.refaccionId);
+          nombre = `${d.cantidad}x ${prod?.tipoFalla} (${prod?.calidad})`;
+        } else {
+          nombre = `${d.cantidad}x ${d.descripcionManual} (Otro)`;
+        }
+        return `${nombre} [$${d.precioUnitario}]`; // <- Le pegamos el precio entre corchetes
+      })
+      .join(' + ');
 
-    // 🔥 MODIFICADO: Agregamos costoEstimado y anticipo al cuerpo de envío
     const payload = {
-      cliente: objetoCliente,
+      cliente: {
+        id: this.clienteIdActual,
+        telefono: formValues.telefono,
+        nombreCompleto: formValues.nombreCompleto,
+      },
       equipo: {
-        tipo: formValues.tipoEquipo, // 👈 ¡CORREGIDO! Cambiado de tipoEquipo a tipo para emparejar con tu entidad Java
+        tipo: formValues.tipoEquipo,
         marca: formValues.marca,
         modelo: formValues.modelo,
         numeroSerie: formValues.numeroSerie || '',
-        cliente: objetoCliente,
       },
-      fallaReportada: formValues.fallaReportada,
+      fallaReportada: textoFallas, // 👈 Se envía: "1x Pantalla (OLED) + 2x Limpieza (Otro)"
       estado: 'RECIBIDO',
-      costoEstimado: formValues.costoEstimado, // 👈 ¡NUEVO! Jala el valor del form
-      anticipo: formValues.anticipo              // 👈 ¡NUEVO! Jala el valor del form
+      costoEstimado: formValues.costoEstimado,
+      anticipo: formValues.anticipo,
     };
 
-    console.log('🚀 Enviando payload definitivo y alineado con Java:', payload);
-
     this.reparacionesService.crearOrden(payload).subscribe({
-      next: (respuestaBD) => {
-        console.log('✅ ¡Guardado exitoso!', respuestaBD);
-        alert('¡Equipo y Orden registrados correctamente en la Base de Datos!');
-        
-        // 🖨️ MODIFICADO: En lugar de ir al dashboard, si respuestaBD trae el id que guardó Spring Boot,
-        // mandamos al usuario directamente a la pantalla de impresión del recibo
-        if (respuestaBD && respuestaBD.id) {
-          this.router.navigate(['/recibo', respuestaBD.id]);
-        } else {
-          // Respaldo por si tu controlador en Java no regresa la orden guardada entera
-          this.router.navigate(['/dashboard']);
+      next: (res) => {
+        if (res && res.id) {
+          this.router.navigate(['/recibo', res.id]);
         }
       },
-      error: (error) => {
-        console.error('❌ Error al guardar:', error);
-        alert(
-          'Hubo un error al procesar el guardado. Revisa la consola de Spring Boot.',
-        );
-      },
+      error: (err) => alert('Error al guardar'),
     });
   }
 }

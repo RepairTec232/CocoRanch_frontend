@@ -1,0 +1,147 @@
+<div class="container-fluid p-4" style="max-width: 1200px; margin: auto;">
+  <h2 class="mb-4 text-primary fw-bold"><i class="pi pi-wallet"></i> Control de Caja</h2>
+
+  <ul class="nav nav-tabs mb-4">
+    <li class="nav-item">
+      <button class="nav-link fw-bold" [class.active]="vistaActual === 'HOY'" (click)="cambiarVista('HOY')">
+        <i class="pi pi-sun text-warning"></i> Movimientos de Hoy
+      </button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link fw-bold" [class.active]="vistaActual === 'HISTORIAL'" (click)="cambiarVista('HISTORIAL')">
+        <i class="pi pi-history text-secondary"></i> Historial de Cortes
+      </button>
+    </li>
+  </ul>
+
+  <div *ngIf="vistaActual === 'HOY'">
+    
+    <div class="row mb-4">
+      <div class="col-md-4">
+        <div class="card border-0 shadow-sm bg-success text-white">
+          <div class="card-body">
+            <h6 class="text-uppercase mb-1 opacity-75">Entradas Totales</h6>
+            <h2 class="mb-0 fw-bold">${{ totalIngresos | number:'1.2-2' }}</h2>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card border-0 shadow-sm bg-danger text-white">
+          <div class="card-body">
+            <h6 class="text-uppercase mb-1 opacity-75">Salidas (Gastos)</h6>
+            <h2 class="mb-0 fw-bold">-${{ totalEgresos | number:'1.2-2' }}</h2>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card border-0 shadow-sm bg-primary text-white">
+          <div class="card-body d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="text-uppercase mb-1 opacity-75">Saldo en Cajón</h6>
+              <h2 class="mb-0 fw-bold">${{ saldoFinal | number:'1.2-2' }}</h2>
+            </div>
+            <button class="btn btn-light fw-bold shadow-sm" (click)="cerrarCaja()" [disabled]="movimientosHoy.length === 0">
+              <i class="pi pi-lock"></i> Hacer Corte
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-8">
+        <div class="card shadow-sm border-0">
+          <div class="card-header bg-white pt-3 border-0">
+            <h5 class="fw-bold m-0"><i class="pi pi-list"></i> Lista de Movimientos</h5>
+          </div>
+          <div class="card-body p-0">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Hora</th>
+                  <th>Descripción</th>
+                  <th>Tipo</th>
+                  <th class="text-end">Monto</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngIf="movimientosHoy.length === 0">
+                  <td colspan="4" class="text-center py-4 text-muted">No hay movimientos registrados hoy.</td>
+                </tr>
+                <tr *ngFor="let m of movimientosHoy">
+                  <td class="text-muted small">{{ m.fechaHora | date:'HH:mm a' }}</td>
+                  <td class="fw-medium">{{ m.descripcion }}</td>
+                  <td>
+                    <span class="badge" [ngClass]="m.tipo === 'INGRESO' ? 'bg-success' : 'bg-danger'">{{ m.tipo }}</span>
+                  </td>
+                  <td class="text-end fw-bold" [ngClass]="m.tipo === 'INGRESO' ? 'text-success' : 'text-danger'">
+                    {{ m.tipo === 'INGRESO' ? '+' : '-' }} ${{ m.monto | number:'1.2-2' }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card shadow-sm border-0 bg-light">
+          <div class="card-body">
+            <h6 class="fw-bold mb-3"><i class="pi pi-plus-circle text-primary"></i> Registrar Movimiento</h6>
+            <form [formGroup]="movimientoForm" (ngSubmit)="registrarMovimientoManual()">
+              <div class="mb-3">
+                <label class="small text-muted fw-bold">Tipo</label>
+                <select class="form-select" formControlName="tipo">
+                  <option value="EGRESO">Salida de Dinero (Gasto)</option>
+                  <option value="INGRESO">Entrada Extraordinaria</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label class="small text-muted fw-bold">Concepto / Descripción</label>
+                <input type="text" class="form-control" formControlName="descripcion" placeholder="Ej. Compra de soldadura">
+              </div>
+              <div class="mb-3">
+                <label class="small text-muted fw-bold">Monto $</label>
+                <input type="number" class="form-control" formControlName="monto">
+              </div>
+              <button type="submit" class="btn btn-primary w-100 fw-bold" [disabled]="movimientoForm.invalid">
+                Guardar Movimiento
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="vistaActual === 'HISTORIAL'">
+    <div class="card shadow-sm border-0">
+      <div class="card-body p-0">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Fecha del Corte</th>
+              <th class="text-success">Total Ingresos</th>
+              <th class="text-danger">Total Egresos</th>
+              <th class="text-primary fw-bold">Saldo Final</th>
+              <th>Observaciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngIf="historialCortes.length === 0">
+              <td colspan="5" class="text-center py-4 text-muted">Aún no hay cortes de caja registrados.</td>
+            </tr>
+            <tr *ngFor="let corte of historialCortes">
+              <td class="fw-bold">{{ corte.fechaCorte | date:'dd/MM/yyyy' }}</td>
+              <td class="text-success">${{ corte.totalIngresos | number:'1.2-2' }}</td>
+              <td class="text-danger">-${{ corte.totalEgresos | number:'1.2-2' }}</td>
+              <td class="text-primary fw-bold">${{ corte.saldoFinal | number:'1.2-2' }}</td>
+              <td class="text-muted small">{{ corte.observaciones }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>

@@ -23,12 +23,29 @@ export class DashboardComponent implements OnInit {
 
   cargando: boolean = true;
 
+  estadisticas: any = {
+    gananciasMes: 0,
+    totalPendientes: 0,
+    totalEnRevision: 0,
+    totalEntregados: 0,
+  };
+
   private router = inject(Router);
 
   constructor(private reparacionesService: ReparacionesService) {}
 
   ngOnInit(): void {
     this.cargarOrdenes();
+    this.cargarEstadisticas();
+  }
+
+  cargarEstadisticas() {
+    this.reparacionesService.obtenerEstadisticas().subscribe({
+      next: (data) => {
+        this.estadisticas = data;
+      },
+      error: (err) => console.error('Error al cargar estadísticas', err),
+    });
   }
 
   abrirNuevaReparacion() {
@@ -103,5 +120,75 @@ export class DashboardComponent implements OnInit {
         },
       });
     }
+  }
+  // 🟢 MAGIA DE WHATSAPP
+  enviarWhatsApp(orden: any): void {
+    if (!orden.telefonoCliente) {
+      alert('Este cliente no tiene un número de teléfono registrado.');
+      return;
+    }
+
+    // 1. Calculamos cuánto debe
+    const costo = orden.costoEstimado || 0;
+    const anticipo = orden.anticipo || 0;
+    const saldo = costo - anticipo;
+
+    // 2. Formateamos el número (Agregamos +52 de México automáticamente)
+    let telefono = orden.telefonoCliente.replace(/\D/g, ''); // Quitamos espacios o guiones
+    if (telefono.length === 10) {
+      telefono = '52' + telefono;
+    }
+
+    // 3. Armamos el mensaje usando saltos de línea (\n) y negritas de WhatsApp (*)
+    let mensaje = `Hola *${orden.nombreCliente}*, te saludamos de RepairTec 🛠️.\n\n`;
+    mensaje += `Te avisamos que tu equipo *${orden.equipoDetalle}* ya está listo y reparado ✅.\n`;
+
+    if (saldo > 0) {
+      mensaje += `El saldo pendiente a pagar en sucursal es de *$${saldo.toFixed(2)}*.\n`;
+    } else {
+      mensaje += `Tu equipo ya está totalmente pagado.\n`;
+    }
+
+    mensaje += `\n¡Te esperamos, que tengas un excelente día!`;
+
+    // 4. Convertimos el texto a formato de link y abrimos la pestaña
+    const url = `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`;
+    window.open(url, '_blank'); // Abre en una nueva pestaña
+  }
+
+  // ⏱️ 1. CÁLCULO DE DÍAS: Cuenta cuántos días han pasado desde que ingresó el equipo
+  calcularDiasEnTaller(fechaIngreso: string | Date): number {
+    if (!fechaIngreso) return 0;
+    const fecha = new Date(fechaIngreso);
+    const hoy = new Date();
+    // Restamos las fechas y convertimos los milisegundos a días
+    const diferencia = hoy.getTime() - fecha.getTime();
+    return Math.floor(diferencia / (1000 * 3600 * 24));
+  }
+
+  // 🚦 2. SEMÁFORO DE TIEMPOS: Decide el color del renglón en la tabla
+  obtenerColorSemaforo(orden: any): string {
+    const dias = this.calcularDiasEnTaller(orden.fechaIngreso);
+
+    // 🔴 ALERTA ROJA (Abandono): Reparado por más de 30 días y no vienen por él
+    if (orden.estado === 'REPARADO' && dias >= 30) {
+      return 'table-danger border-danger border-2';
+    }
+
+    // 🟡 ALERTA AMARILLA (Atraso): Recibido o En Revisión por más de 3 días
+    if (
+      (orden.estado === 'RECIBIDO' || orden.estado === 'EN_REVISION') &&
+      dias >= 3
+    ) {
+      return 'table-warning';
+    }
+
+    // 🟢 (Opcional) VERDE: Ya se entregó, lo pintamos de verde bajito
+    if (orden.estado === 'ENTREGADO') {
+      return 'table-success opacity-75';
+    }
+
+    // Blanco/Normal si todo va en tiempo
+    return '';
   }
 }

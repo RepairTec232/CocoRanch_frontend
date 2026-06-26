@@ -18,6 +18,11 @@ export class AnalyticsDashboardComponent implements OnInit {
 
   public listaFaltantes: OrdenRespuesta[] = [];
 
+  // 🪟 Variables para el Modal Express
+  mostrarModalDetalles: boolean = false;
+  tituloModal: string = '';
+  equiposEnModal: any[] = [];
+
   constructor(private reparacionesService: ReparacionesService) {}
 
   ngOnInit(): void {
@@ -55,6 +60,32 @@ export class AnalyticsDashboardComponent implements OnInit {
       ],
       colors: ['#6c757d', '#ffc107', '#28a745'], // Gris, Amarillo y Verde estilizados
     };
+  }
+
+  // ⚡ Función para abrir la ventanita mágica
+  verDetalles(estado: string) {
+    // 1. Ponemos el título dependiendo del botón que presionó
+    this.tituloModal = estado === 'RECIBIDO' 
+      ? 'Teléfonos en Fila (Esperando Revisión)' 
+      : 'Equipos en Banco (Desarmados / En Revisión)';
+    
+    // 2. Mostramos la ventana
+    this.mostrarModalDetalles = true;
+    this.equiposEnModal = []; // Limpiamos la lista anterior
+
+    // 3. Traemos los datos frescos de la base de datos y los filtramos
+    this.reparacionesService.obtenerOrdenes().subscribe({
+      next: (ordenes: any[]) => {
+        // Guardamos solo los que coinciden con el estado del botón
+        this.equiposEnModal = ordenes.filter(o => o.estado === estado);
+      },
+      error: (err: any) => console.error('Error al cargar detalles', err)
+    });
+  }
+
+  // ❌ Función para cerrar la ventana
+  cerrarModalDetalles() {
+    this.mostrarModalDetalles = false;
   }
 
   // Función para generar el enlace de WhatsApp perfectamente limpio

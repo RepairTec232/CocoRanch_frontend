@@ -6,6 +6,8 @@ import { NuevaReparacionComponent } from './components/nueva-reparacion.componen
 import { RevisarEquipoComponent } from './components/revisar-equipo.component';
 import { AnalyticsDashboardComponent } from './Dashboard/analytics-dashboard.component';
 import { ReciboImpresionComponent } from './components/routes/recibo-impresion/recibo-impresion.component';
+import { CatalogoRefaccionesComponent } from './components/routes/catalogo-refacciones/catalogo-refacciones.component';
+import { CorteCajaComponent } from './components/routes/corte-caja/corte-caja.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -21,7 +23,9 @@ export const routes: Routes = [
       { path: 'revisar-equipo/:id', component: RevisarEquipoComponent },
       { path: 'revisar-equipo/:folio', component: NuevaReparacionComponent },
       { path: 'estadisticas', component: AnalyticsDashboardComponent },
-      { path: 'recibo/:id', component: ReciboImpresionComponent }
+      { path: 'recibo/:id', component: ReciboImpresionComponent },
+      { path: 'catalogo', component: CatalogoRefaccionesComponent },
+      { path: 'caja', component: CorteCajaComponent }
     ]
   },
   // Comodín por si hay un error en la URL

@@ -1,111 +1,279 @@
 <div class="container-fluid py-4" *ngIf="!cargando">
-  <h2 class="mb-4">📊 Panel Estadístico Mensual</h2>
-
-  <div class="row mb-4">
-    <div class="col-md-3">
-      <div class="card bg-success text-white shadow-sm">
-        <div class="card-body">
-          <h6>💰 Ganancias del Mes</h6>
-          <h3>${{ stats.gananciasMes | number: "1.2-2" }}</h3>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-3">
-      <div class="card bg-secondary text-white shadow-sm">
-        <div class="card-body">
-          <h6>⏳ Equipos Pendientes</h6>
-          <h3>{{ stats.totalPendientes }}</h3>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-3">
-      <div class="card bg-warning text-dark shadow-sm">
-        <div class="card-body">
-          <h6>⚙️ En Revisión</h6>
-          <h3>{{ stats.totalEnRevision }}</h3>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-3">
-      <div class="card bg-primary text-white shadow-sm">
-        <div class="card-body">
-          <h6>✅ Entregados/Reparados</h6>
-          <h3>{{ stats.totalEntregados }}</h3>
-        </div>
-      </div>
-    </div>
+  <div class="d-flex align-items-center mb-4 mt-2">
+    <i class="pi pi-chart-bar fs-3 text-secondary me-3"></i>
+    <h3 class="m-0 text-dark fw-normal">Panel Estadístico Mensual</h3>
   </div>
 
   <div class="row mb-4">
-    <div class="col-md-6">
-      <div class="card p-3 shadow-sm">
-        <h5>📈 Distribución de Estados de Trabajo</h5>
-        <apx-chart
-          [series]="chartOptions.series"
-          [chart]="chartOptions.chart"
-          [labels]="chartOptions.labels"
-          [colors]="chartOptions.colors"
-        >
-        </apx-chart>
-      </div>
-    </div>
-
-    <div class="col-md-6">
-      <div class="card p-3 shadow-sm h-100">
-        <h5>🔔 Alertas del Taller</h5>
-        <p class="text-muted">
-          Tienes {{ stats.totalPendientes }} teléfonos esperando diagnóstico
-          técnico en la fila.
-        </p>
-      </div>
-    </div>
-  </div>
-
-  <div class="card shadow-sm">
-    <div
-      class="card-header bg-dark text-white d-flex justify-content-between align-items-center"
-    >
-      <h5 class="mb-0">📋 Teléfonos Listos (Faltantes por Entregar)</h5>
-      <span class="badge bg-danger"
-        >{{ listaFaltantes.length }} Equipos en espera</span
+    <div class="col-md-3">
+      <div
+        class="card border-0 shadow-sm rounded-4 bg-success text-white overflow-hidden h-100"
       >
+        <div class="card-body position-relative p-4">
+          <h6
+            class="text-uppercase fw-bold opacity-75 mb-1"
+            style="font-size: 0.75rem; letter-spacing: 1px"
+          >
+            Ingresos del Mes
+          </h6>
+          <h2 class="mb-0 fw-bolder">
+            ${{ stats.gananciasMes | number: "1.2-2" }}
+          </h2>
+          <i
+            class="pi pi-dollar position-absolute opacity-25"
+            style="font-size: 6rem; top: -15px; right: -15px"
+          ></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div
+        class="card border-0 shadow-sm rounded-4 bg-primary text-white overflow-hidden h-100"
+      >
+        <div class="card-body position-relative p-4">
+          <h6
+            class="text-uppercase fw-bold opacity-75 mb-1"
+            style="font-size: 0.75rem; letter-spacing: 1px"
+          >
+            En Fila (Recibidos)
+          </h6>
+          <h2 class="mb-0 fw-bolder">
+            {{ stats.totalPendientes }}
+            <span class="fs-6 fw-normal">equipos</span>
+          </h2>
+          <i
+            class="pi pi-inbox position-absolute opacity-25"
+            style="font-size: 6rem; top: -15px; right: -15px"
+          ></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div
+        class="card border-0 shadow-sm rounded-4 bg-warning text-dark overflow-hidden h-100"
+      >
+        <div class="card-body position-relative p-4">
+          <h6
+            class="text-uppercase fw-bold opacity-75 mb-1"
+            style="font-size: 0.75rem; letter-spacing: 1px"
+          >
+            En Banco de Trabajo
+          </h6>
+          <h2 class="mb-0 fw-bolder">
+            {{ stats.totalEnRevision }}
+            <span class="fs-6 fw-normal">equipos</span>
+          </h2>
+          <i
+            class="pi pi-cog position-absolute opacity-25"
+            style="font-size: 6rem; top: -15px; right: -15px"
+          ></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div
+        class="card border-0 shadow-sm rounded-4 bg-info text-white overflow-hidden h-100"
+      >
+        <div class="card-body position-relative p-4">
+          <h6
+            class="text-uppercase fw-bold opacity-75 mb-1"
+            style="font-size: 0.75rem; letter-spacing: 1px"
+          >
+            Éxitos (Entregados)
+          </h6>
+          <h2 class="mb-0 fw-bolder">
+            {{ stats.totalEntregados }}
+            <span class="fs-6 fw-normal">equipos</span>
+          </h2>
+          <i
+            class="pi pi-check-circle position-absolute opacity-25"
+            style="font-size: 6rem; top: -15px; right: -15px"
+          ></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mb-5">
+    <div class="col-md-6">
+      <div class="card h-100 shadow-sm border-0 rounded-4">
+        <div
+          class="card-header bg-transparent border-0 pt-4 pb-0 d-flex justify-content-between align-items-center"
+        >
+          <h6 class="fw-bold m-0 text-dark">
+            <i class="pi pi-chart-pie me-2" style="color: #475569"></i
+            >Distribución de Estados de Trabajo
+          </h6>
+          <span
+            class="badge bg-light text-secondary rounded-pill border px-3 py-2"
+            style="font-size: 0.7rem; letter-spacing: 0.5px"
+          >
+            MES ACTUAL
+          </span>
+        </div>
+        <div
+          class="card-body d-flex justify-content-center align-items-center py-4"
+        >
+          <apx-chart
+            class="w-100"
+            [series]="chartOptions.series"
+            [chart]="chartOptions.chart"
+            [labels]="chartOptions.labels"
+            [colors]="chartOptions.colors"
+          ></apx-chart>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div
+        class="card h-100 shadow-sm border-0 rounded-4"
+        style="border-top: 4px solid #f87171 !important"
+      >
+        <div class="card-header bg-transparent border-0 pt-4 pb-0">
+          <h6 class="fw-bold m-0 text-dark">
+            <i class="pi pi-bell me-2" style="color: #f87171"></i>Alertas del
+            Taller
+          </h6>
+        </div>
+        <div class="card-body pt-4">
+          <div
+            class="alert border-0 rounded-4 d-flex align-items-center mb-3 shadow-sm py-3 px-4"
+            style="background-color: #ffe4e6; color: #881337"
+            *ngIf="stats.totalPendientes > 0"
+          >
+            <i
+              class="pi pi-exclamation-triangle fs-3 me-3"
+              style="color: #e11d48"
+            ></i>
+            <div class="flex-grow-1">
+              <span
+                class="badge rounded-3 mb-1 px-2"
+                style="background-color: #e11d48; color: white"
+                >{{ stats.totalPendientes }}</span
+              >
+              <p class="mb-0 fw-medium" style="font-size: 0.9rem">
+                teléfono(s) esperando diagnóstico técnico en la fila.
+              </p>
+            </div>
+            <button
+              (click)="verDetalles('RECIBIDO')"
+              class="btn btn-sm rounded-pill px-3 fw-bold"
+              style="
+                background-color: transparent;
+                border: 1px solid #fda4af;
+                color: #9f1239;
+              "
+            >
+              Ver Detalles
+            </button>
+          </div>
+
+          <div
+            class="alert border-0 rounded-4 d-flex align-items-center mb-3 shadow-sm py-3 px-4"
+            style="background-color: #e0f2fe; color: #0c4a6e"
+            *ngIf="stats.totalEnRevision > 0"
+          >
+            <i class="pi pi-info-circle fs-3 me-3" style="color: #0284c7"></i>
+            <div class="flex-grow-1">
+              <span
+                class="badge rounded-3 mb-1 px-2"
+                style="background-color: #0284c7; color: white"
+                >{{ stats.totalEnRevision }}</span
+              >
+              <p class="mb-0 fw-medium" style="font-size: 0.9rem">
+                equipo(s) desarmados o en revisión actual.
+              </p>
+            </div>
+            <button
+              (click)="verDetalles('EN_REVISION')"
+              class="btn btn-sm rounded-pill px-3 fw-bold"
+              style="
+                background-color: transparent;
+                border: 1px solid #7dd3fc;
+                color: #0369a1;
+              "
+            >
+              Ver Detalles
+            </button>
+          </div>
+
+          <div
+            class="alert border-0 rounded-4 d-flex align-items-center shadow-sm py-3 px-4"
+            style="background-color: #dcfce7; color: #14532d"
+            *ngIf="stats.totalPendientes === 0 && stats.totalEnRevision === 0"
+          >
+            <i class="pi pi-check-circle fs-3 me-3" style="color: #16a34a"></i>
+            <div class="flex-grow-1">
+              <h6 class="mb-0 fw-bold">¡Excelente trabajo!</h6>
+              <p class="mb-0 fw-medium" style="font-size: 0.9rem">
+                Tienes el taller completamente al día, sin atrasos.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm border rounded-2 mb-5">
+    <div
+      class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center"
+    >
+      <h6 class="mb-0 fw-normal text-dark">
+        <i class="pi pi-list me-2 text-primary"></i>Teléfonos Listos (Faltantes
+        por Entregar)
+      </h6>
+      <span
+        class="badge bg-danger rounded-pill fw-normal px-3 py-2"
+        style="letter-spacing: 0.5px"
+      >
+        {{ listaFaltantes.length }} Equipos en espera
+      </span>
     </div>
     <div class="card-body p-0">
       <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
-          <thead class="table-light">
+          <thead
+            class="table-light text-secondary"
+            style="font-size: 0.85rem; text-transform: uppercase"
+          >
             <tr>
-              <th style="width: 10%">Folio</th>
+              <th style="width: 10%" class="ps-4">Folio</th>
               <th style="width: 20%">Cliente</th>
-              <th style="width: 15%">Teléfono</th>
+              <th style="width: 15%">Contacto</th>
               <th style="width: 20%">Equipo</th>
               <th style="width: 20%">Falla Solucionada</th>
-              <th style="width: 15%">Costo Total</th>
+              <th style="width: 15%">Saldo Pendiente</th>
             </tr>
           </thead>
           <tbody>
             <tr *ngFor="let orden of listaFaltantes">
-              <td>
+              <td class="ps-4">
                 <strong>#{{ orden.id }}</strong>
               </td>
-              <td>{{ orden.nombreCliente }}</td>
+              <td class="fw-medium text-dark">{{ orden.nombreCliente }}</td>
               <td>
                 <a
                   [href]="getWhatsAppLink(orden.telefonoCliente)"
                   target="_blank"
-                  class="btn btn-sm btn-outline-success fw-bold d-inline-flex align-items-center gap-1"
+                  class="btn btn-sm btn-outline-success fw-bold rounded-pill px-3 d-inline-flex align-items-center gap-1"
                 >
-                  <i class="pi pi-whatsapp"></i> Mandar WhatsApp
+                  <i class="pi pi-whatsapp"></i> Avisar
                 </a>
               </td>
-              <td>{{ orden.equipoDetalle }}</td>
-              <td>{{ orden.fallaReportada }}</td>
-              <td class="text-primary fw-bold">
+              <td class="text-muted">{{ orden.equipoDetalle }}</td>
+              <td class="text-muted small">{{ orden.fallaReportada }}</td>
+              <td class="text-success fw-bold fs-6">
                 ${{ orden.costoTotal | number: "1.2-2" }}
               </td>
             </tr>
             <tr *ngIf="listaFaltantes.length === 0">
-              <td colspan="6" class="text-center py-4 text-muted">
+              <td colspan="6" class="text-center py-5 text-muted">
+                <i class="pi pi-box fs-2 mb-3 text-light"></i><br />
                 🎉 ¡Excelente! No hay equipos reparados pendientes de entrega.
               </td>
             </tr>
@@ -116,7 +284,80 @@
   </div>
 </div>
 
-<div *ngIf="cargando" class="text-center my-5">
-  <div class="spinner-border text-primary" role="status"></div>
-  <p class="mt-2 text-muted">Construyendo gráficos de rendimiento del mes...</p>
+<div *ngIf="cargando" class="text-center my-5 py-5">
+  <div
+    class="spinner-border text-primary mb-3"
+    style="width: 3rem; height: 3rem"
+    role="status"
+  ></div>
+  <h5 class="text-muted fw-normal">Construyendo panel de rendimiento...</h5>
+</div>
+
+<div
+  class="modal d-block"
+  tabindex="-1"
+  style="background-color: rgba(0, 0, 0, 0.4); backdrop-filter: blur(2px)"
+  *ngIf="mostrarModalDetalles"
+>
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content border-0 rounded-4 shadow-lg">
+      <div class="modal-header border-bottom-0 pb-0 mt-2 mx-2">
+        <h5 class="modal-title fw-bold text-dark">
+          <i class="pi pi-list me-2 text-primary"></i>{{ tituloModal }}
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          (click)="cerrarModalDetalles()"
+        ></button>
+      </div>
+
+      <div class="modal-body pt-3 px-4">
+        <div class="table-responsive border rounded-3">
+          <table class="table table-hover align-middle mb-0">
+            <thead
+              class="table-light text-secondary"
+              style="font-size: 0.85rem; text-transform: uppercase"
+            >
+              <tr>
+                <th class="ps-3">Folio</th>
+                <th>Cliente</th>
+                <th>Equipo</th>
+                <th>Falla Reportada</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let eq of equiposEnModal">
+                <td class="ps-3">
+                  <strong>#{{ eq.id }}</strong>
+                </td>
+                <td class="fw-medium text-dark">{{ eq.nombreCliente }}</td>
+                <td class="text-muted">{{ eq.equipoDetalle }}</td>
+                <td class="text-muted small">{{ eq.fallaReportada }}</td>
+              </tr>
+              <tr *ngIf="equiposEnModal.length === 0">
+                <td colspan="4" class="text-center py-5 text-muted">
+                  <div
+                    class="spinner-border spinner-border-sm text-primary me-2"
+                    role="status"
+                  ></div>
+                  Buscando equipos...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="modal-footer border-top-0 pt-2 pb-3">
+        <button
+          type="button"
+          class="btn btn-secondary rounded-pill px-4"
+          (click)="cerrarModalDetalles()"
+        >
+          Cerrar Ventana
+        </button>
+      </div>
+    </div>
+  </div>
 </div>

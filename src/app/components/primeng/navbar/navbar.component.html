@@ -1,111 +1,54 @@
-<div 
-    [ngClass]="appService.getThemeClass('navbar')"
+<div
+  [ngClass]="appService.getThemeClass('navbar')"
+  class="d-flex align-items-center w-100 px-3 py-2 shadow-sm"
 >
-    <div 
-        [ngClass]="appService.getThemeClass('navbar-icon')"
-    >
-        <i class="pi pi-bars navbar-menu-icon" (click)="appService.toggleSidebarMenu()"></i> 
-    </div>
-
+  <div class="d-flex align-items-center justify-content-start gap-4">
     <div class="navbar-logo">
-        <a routerLink="/"><img [src]="logoSrc()" alt="Logo"></a>
+      <a routerLink="/">
+        <img [src]="logoSrc()" alt="Logo" style="height: 50px; width: auto" />
+      </a>
     </div>
 
-    <div class="d-flex align-items-center gap-3">
-        <div 
-            *ngIf="type()==='blue'||type()==='white'"
-            [ngClass]="appService.getThemeClass('navbar-brand')"
-            style="cursor: pointer;"
-            routerLink="/dashboard"
-        >
-            RepairTec
-        </div>
+    <div class="d-flex align-items-center gap-2">
+      <button
+        class="btn btn-sm text-decoration-none fw-bold px-3 py-2 border-0 shadow-none"
+        [ngClass]="appService.getThemeClass('navbar-brand')"
+        style="color: #4b5563; transition: all 0.2s"
+        routerLink="/dashboard"
+        routerLinkActive="bg-primary bg-opacity-10 text-primary rounded-3"
+      >
+        📋 Órdenes
+      </button>
 
-        <div class="d-flex gap-2 ms-2">
-            <button 
-                class="btn btn-sm btn-link text-decoration-none fw-bold"
-                [ngClass]="appService.getThemeClass('navbar-brand')"
-                routerLink="/dashboard"
-                routerLinkActive="border-bottom border-2"
-            >
-                📋 Órdenes
-            </button>
-            <button 
-                class="btn btn-sm btn-link text-decoration-none fw-bold"
-                [ngClass]="appService.getThemeClass('navbar-brand')"
-                routerLink="/estadisticas"
-                routerLinkActive="border-bottom border-2"
-            >
-                📊 Estadísticas
-            </button>
-        </div>
+      <button
+        class="btn btn-sm text-decoration-none fw-bold px-3 py-2 border-0 shadow-none"
+        [ngClass]="appService.getThemeClass('navbar-brand')"
+        style="color: #4b5563; transition: all 0.2s"
+        routerLink="/estadisticas"
+        routerLinkActive="bg-primary bg-opacity-10 text-primary rounded-3"
+      >
+        📊 Estadísticas
+      </button>
+
+      <button
+        class="btn btn-sm text-decoration-none fw-bold px-3 py-2 border-0 shadow-none"
+        [ngClass]="appService.getThemeClass('navbar-brand')"
+        style="color: #4b5563; transition: all 0.2s"
+        routerLink="/catalogo"
+        routerLinkActive="bg-primary bg-opacity-10 text-primary rounded-3"
+      >
+        📦 Catálogo
+      </button>
+
+      <button
+        class="btn btn-sm text-decoration-none fw-bold px-3 py-2 border-0 shadow-none"
+        [ngClass]="appService.getThemeClass('navbar-brand')"
+        style="color: #4b5563; transition: all 0.2s"
+        routerLink="/caja"
+        routerLinkActive="bg-primary bg-opacity-10 text-primary rounded-3"
+      >
+        💵 Caja y Cortes
+      </button>
     </div>
-
-    <div [ngClass]="appService.getThemeClass('navbar-search')">
-        <app-search-input [options]="searchOptions.bind(this)" [type]="type.bind(this)"></app-search-input>
-    </div>
-
-    <div class="navbar-buttons">
-        <i 
-            class="pi pi-bell notification-button" 
-            [ngClass]="appService.getThemeClass('navbar-icon')"
-            (click)="toggleNotifications()"
-        >
-            <span *ngIf="notifications().length > 0" class="notification-count">{{ notifications().length }}</span>
-        </i>
-        <i 
-            class="pi pi-user navbar-icon" 
-            [ngClass]="appService.getThemeClass('navbar-icon')"
-            (click)="toggleUserMenu()"
-        ></i>
-    </div>
-
-    <ul *ngIf="isNotificationsVisible()" [ngClass]="appService.getThemeClass('notifications-dropdown')" (blur)="onBlurNotifications()">
-        <div class="notification-header-container">
-            <span [ngClass]="appService.getThemeClass('notification-label')">
-                Notificaciones
-            </span>
-            <i (click)="toggleNotifications()" class="close-icon pi pi-times"></i>
-        </div>
-        <div class="notification-btn-container">
-            <span (click)="toogleViewAllNotifications()" [ngClass]="viewAllNotifications() ? 'notification-btn':'notification-btn selected'">Sin leer</span>
-            <span (click)="toogleViewAllNotifications()" [ngClass]="viewAllNotifications() ? 'notification-btn selected':'notification-btn'">Todas</span>
-        </div>
-        <li *ngFor="let notification of getNotifications() let i = index" (click)="onClickNotification(i)">
-            <i [ngClass]="notification.icon+ ' notification-icon'"></i>
-            <div class="notification-text-container">
-                <span class="notification-title">
-                    {{ notification.title }}
-                </span>
-                <span class="notification-text">
-                    {{ notification.text }}
-                </span>
-                <span class="notification-time">
-                    {{ notification.date | timeAgo }}
-                </span>
-            </div>
-        </li>
-        <div *ngIf="getNotifications().length===0">
-            <i class="pi pi-eye-slash notification-text no-notifications">
-                <span>No tienes notificaciones sin leer</span>
-            </i>
-        </div>
-    </ul>
-
-    <ul *ngIf="isUserMenuVisible()" [ngClass]="appService.getThemeClass('user-dropdown')" (blur)="onBlurUserMenu()">
-        <app-userinfo></app-userinfo>
-        <i (click)="toggleUserMenu()" class="close-icon pi pi-times"></i>
-
-        <li [ngClass]="appService.getThemeClass('theme-switch-container')">
-            <app-theme-switch></app-theme-switch>
-        </li>
-        <li (click)="userConfigRedirect()">
-            <i [class]="'pi pi-user '+ appService.getThemeClass('account-icon')"></i>
-            <span class="account-data-text">Perfil</span>
-        </li>
-        <li (click)="logout()">
-            <i [class]="'pi pi-external-link '+ appService.getThemeClass('account-icon')"></i>
-            <span class="account-data-text">Cerrar Sesión</span>
-        </li>
-    </ul>
+  </div>
 </div>

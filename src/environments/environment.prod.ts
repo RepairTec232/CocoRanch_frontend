@@ -17,7 +17,7 @@ export const environment = {
         //navType: "blue",
         //navType: "white-1",
         navType: "white", 
-        logoFile: "logo-coppel.svg",
+        logoFile: 'logo-fidel.svg',
         bannerFile: "banner.jpg",
         useLoginScreen: true,
         hideSidebarHeader: true,

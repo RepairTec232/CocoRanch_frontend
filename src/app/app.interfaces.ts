@@ -88,3 +88,39 @@ export interface Reparacion {
   clienteNombre?: string; 
   clienteTelefono?: string;
 }
+
+export interface Refaccion {
+  id?: number;
+  marca: string;
+  modelo: string;
+  tipoFalla: string;
+  calidad: string;
+  costoPieza: number;
+  costoVuelta?: number;
+  ganancia: number;
+  precioTotalCliente?: number;
+}
+
+export interface MovimientoCaja {
+  id?: number;
+  tipo: 'INGRESO' | 'EGRESO';
+  descripcion: string;
+  monto: number;
+  fechaHora?: string;
+}
+
+export interface CorteCaja {
+  id?: number;
+  fechaCorte?: string;
+  totalIngresos: number;
+  totalEgresos: number;
+  saldoFinal: number;
+  observaciones?: string;
+}
+
+export interface DashboardStats {
+  gananciasMes: number;
+  totalPendientes: number;
+  totalEnRevision: number;
+  totalEntregados: number;
+}
