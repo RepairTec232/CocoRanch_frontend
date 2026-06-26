@@ -1,6 +1,8 @@
 export const environment = {
     Production: false,
+    // apiUrl: '/api',
     apiUrl: 'http://localhost:8080/api',
+
     DebugMode: true,
 
     ActiveDirectory: {
