@@ -30,6 +30,7 @@ export function MSALGuardConfigFactory() {
 export const appConfig: ApplicationConfig = {
 providers: [
     provideRouter(routes), 
+    provideHttpClient(),
     provideHttpClient(withInterceptorsFromDi()),
     provideHttpClient(withFetch()),
     provideAnimations(),

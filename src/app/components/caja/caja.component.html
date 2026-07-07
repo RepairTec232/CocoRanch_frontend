@@ -1,0 +1,164 @@
+<div class="container-fluid mt-3" *ngIf="ordenActiva">
+  <div class="row">
+    
+    <div class="col-md-5">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-secondary text-white p-3">
+          <h5 class="mb-0">
+            <i class="bi bi-receipt-cutoff"></i> Resumen - Mesa
+            {{ ordenActiva.mesa?.numero }}
+          </h5>
+        </div>
+
+        <div class="card-body p-0" style="max-height: 350px; overflow-y: auto">
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item p-3 border-bottom" *ngFor="let detalle of ordenActiva.detalles">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <h6 class="mb-0 fw-bold">{{ detalle.producto?.nombre }}</h6>
+                  <small class="text-muted">
+                    ${{ detalle.precioUnitario | number: "1.2-2" }} x {{ detalle.cantidad }}
+                  </small>
+                  <div *ngIf="detalle.notas" class="text-warning small mt-1">
+                    <i class="bi bi-chat-text"></i> {{ detalle.notas }}
+                  </div>
+                </div>
+                <span class="fw-bold text-dark">
+                  ${{ detalle.precioUnitario * detalle.cantidad | number: "1.2-2" }}
+                </span>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <div class="card-footer bg-light p-3">
+          <div class="d-flex justify-content-between align-items-center text-muted mb-1">
+            <span>Subtotal Consumo:</span>
+            <span class="fw-bold">${{ ordenActiva.subtotal | number: "1.2-2" }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-7">
+      <div class="card shadow border-0">
+        
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center p-3">
+          <button class="btn btn-sm btn-light fw-bold shadow-sm" (click)="regresar()">
+            <i class="bi bi-arrow-left me-1"></i> Regresar
+          </button>
+          <h4 class="mb-0 fw-bold">Módulo de Pago</h4>
+          <div style="width: 85px;"></div> 
+        </div>
+
+        <div class="card-body p-4">
+          <h6 class="text-muted mb-3">1. Selecciona Método de Pago</h6>
+          
+          <div class="row g-3 mb-4">
+            <div class="col-6">
+              <button
+                class="btn w-100 py-3 d-flex flex-column align-items-center justify-content-center gap-2"
+                [ngClass]="metodoPago === 'EFECTIVO' ? 'btn-success' : 'btn-outline-success'"
+                (click)="metodoPago = 'EFECTIVO'"
+              >
+                <i class="bi bi-cash-coin fs-2"></i>
+                <span class="fw-bold">Efectivo</span>
+              </button>
+            </div>
+            <div class="col-6">
+              <button
+                class="btn w-100 py-3 d-flex flex-column align-items-center justify-content-center gap-2"
+                [ngClass]="metodoPago === 'TARJETA' ? 'btn-info text-white' : 'btn-outline-info'"
+                (click)="metodoPago = 'TARJETA'"
+              >
+                <i class="bi bi-credit-card fs-2"></i>
+                <span class="fw-bold">Tarjeta</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label fw-bold text-muted small text-uppercase">Calcular Propina</label>
+            <div class="btn-group w-100 mb-3 shadow-sm" role="group">
+              <button type="button" class="btn btn-outline-secondary fw-bold" [class.active]="porcentajeSeleccionado === 0" (click)="seleccionarPorcentaje(0)">
+                0%
+              </button>
+              <button type="button" class="btn btn-outline-primary fw-bold" [class.active]="porcentajeSeleccionado === 5" (click)="seleccionarPorcentaje(5)">
+                5%
+              </button>
+              <button type="button" class="btn btn-outline-primary fw-bold" [class.active]="porcentajeSeleccionado === 10" (click)="seleccionarPorcentaje(10)">
+                10%
+              </button>
+              <button type="button" class="btn btn-outline-primary fw-bold" [class.active]="porcentajeSeleccionado === 15" (click)="seleccionarPorcentaje(15)">
+                15%
+              </button>
+              <button type="button" class="btn btn-outline-primary fw-bold" [class.active]="porcentajeSeleccionado === 20" (click)="seleccionarPorcentaje(20)">
+                20%
+              </button>
+            </div>
+
+            <div class="input-group">
+              <span class="input-group-text bg-light text-muted font-monospace">$</span>
+              <input
+                type="number"
+                class="form-control fw-bold fs-5"
+                [ngModel]="propina"
+                (ngModelChange)="cambiarPropinaManual($event)"
+                placeholder="Monto de propina"
+              />
+              <span class="input-group-text bg-warning-subtle text-warning-dark fw-bold small">
+                {{ porcentajeSeleccionado === "custom" ? "Manual" : porcentajeSeleccionado + "%" }}
+              </span>
+            </div>
+            <small class="text-muted mt-1 d-block">Elige un porcentaje rápido o escribe una cantidad personalizada.</small>
+          </div>
+
+          <div class="card bg-light border-0 p-3 rounded-3 mb-3">
+            <div class="d-flex justify-content-between mb-1">
+              <span class="text-muted">Consumo (Subtotal):</span>
+              <span class="fw-bold">${{ subtotal | number: "1.2-2" }}</span>
+            </div>
+            <div class="d-flex justify-content-between mb-2">
+              <span class="text-success fw-bold">Propina agregada:</span>
+              <span class="text-success fw-bold">+${{ propina | number: "1.2-2" }}</span>
+            </div>
+            <hr class="my-2" />
+            <div class="d-flex justify-content-between align-items-center fw-bold fs-4">
+              <span>Total a Cobrar:</span>
+              <span class="text-primary">${{ totalAPagar | number: "1.2-2" }}</span>
+            </div>
+          </div>
+          <hr />
+          
+          <div class="d-flex justify-content-between align-items-center mb-2 text-muted fs-5">
+            <span>Subtotal Consumo:</span>
+            <strong>${{ subtotal | number: "1.2-2" }}</strong>
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center mb-2 text-danger fs-5" *ngIf="comision > 0">
+            <span>Comisión Bancaria (4%):</span>
+            <strong>+${{ comision | number: "1.2-2" }}</strong>
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center mb-4 text-success fs-5" *ngIf="propina > 0">
+            <span>Propina (Opcional):</span>
+            <strong>+${{ propina | number: "1.2-2" }}</strong>
+          </div>
+
+          <div class="alert alert-primary text-center py-3 rounded-3 mb-4">
+            <h3 class="mb-0 fw-bold text-primary">
+              TOTAL A COBRAR: ${{ totalFinal | number: "1.2-2" }}
+            </h3>
+          </div>
+
+          <div class="d-grid">
+            <button class="btn btn-lg btn-primary fw-bold py-3" (click)="procesarCobro()">
+              <i class="bi bi-check-circle-fill me-2"></i> Registrar Pago y Liberar Mesa
+            </button>
+          </div>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

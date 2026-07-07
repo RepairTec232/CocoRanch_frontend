@@ -1,2 +1,79 @@
-<router-outlet></router-outlet>
-<p-toast position="bottom-center" />
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+  <div class="container-fluid px-4">
+    <a
+      class="navbar-brand fw-bold d-flex align-items-center"
+      routerLink="/mesas"
+    >
+      <i class="bi bi-shop fs-3 text-warning me-2"></i>
+      <span class="fs-4"
+        >CocoRanch <span class="text-warning">Sinaloa</span></span
+      >
+    </a>
+
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarCentral"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarCentral">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4 gap-2">
+        <li class="nav-item">
+          <a
+            class="nav-link fs-6 px-3 rounded"
+            routerLink="/mesas"
+            routerLinkActive="bg-warning text-dark fw-bold"
+          >
+            <i class="bi bi-grid-3x3-gap-fill me-1"></i> Mesas
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a
+            class="nav-link fs-6 px-3 rounded"
+            routerLink="/admin-menu"
+            routerLinkActive="bg-warning text-dark fw-bold"
+          >
+            <i class="bi bi-list-columns-reverse me-1"></i> Editor de Menú
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a
+            class="nav-link fs-6 px-3 rounded"
+            routerLink="/corte-caja"
+            routerLinkActive="bg-warning text-dark fw-bold"
+          >
+            <i class="bi bi-cash-stack me-1"></i> Corte de Caja
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a
+            class="nav-link fs-6 px-3 rounded"
+            routerLink="/facturacion"
+            routerLinkActive="bg-warning text-dark fw-bold"
+          >
+            <i class="bi bi-cash-stack me-1"></i> Facturación
+          </a>
+        </li>
+      </ul>
+
+      <div class="d-flex align-items-center mt-3 mt-lg-0">
+        <span class="text-light me-4">
+          <i class="bi bi-person-circle text-secondary me-1"></i> Admin
+        </span>
+        <button class="btn btn-outline-warning btn-sm">
+          <i class="bi bi-box-arrow-right"></i> Salir
+        </button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="container-fluid mt-4 px-4 pb-5">
+  <router-outlet></router-outlet>
+</div>

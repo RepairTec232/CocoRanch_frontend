@@ -1,6 +1,6 @@
 export const environment = {
     Production: false,
-    // apiUrl: '/api',
+    apiUrl: '/api',
     DebugMode: true,
 
     ActiveDirectory: {

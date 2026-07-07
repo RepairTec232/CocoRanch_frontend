@@ -1,33 +1,17 @@
 import { Routes } from '@angular/router';
-import { DefaultLayoutComponent } from './components/layout/default-layout/default-layout.component';
-import { LoginComponent } from './components/routes/login/login.component';
-import { DashboardComponent } from './Dashboard/dashboard.component';
-import { NuevaReparacionComponent } from './components/nueva-reparacion.component';
-import { RevisarEquipoComponent } from './components/revisar-equipo.component';
-import { AnalyticsDashboardComponent } from './Dashboard/analytics-dashboard.component';
-import { ReciboImpresionComponent } from './components/routes/recibo-impresion/recibo-impresion.component';
-import { CatalogoRefaccionesComponent } from './components/routes/catalogo-refacciones/catalogo-refacciones.component';
-import { CorteCajaComponent } from './components/routes/corte-caja/corte-caja.component';
+import { MapaMesasComponent } from './components/mapa-mesas/mapa-mesas.component';
+import { CajaComponent } from './components/caja/caja.component';
+import { ComandaComponent } from './components/comanda/comanda.component';
+import { MenuAdminComponent } from './components/menu-admin/menu-admin.component';
+import { CorteCajaComponent } from './components/corte-caja/corte-caja.component';
+import { FacturacionComponent } from './components/facturacion/facturacion.component';
 
 export const routes: Routes = [
-  { path: 'login', component: LoginComponent },
-  {
-    path: '',
-    component: DefaultLayoutComponent,
-    data: { includeNavBar: true },
-    children: [
-      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-      { path: 'dashboard', component: DashboardComponent },
-      // 👇 Las rutas vitales van aquí adentro 👇
-      { path: 'nueva-reparacion', component: NuevaReparacionComponent },
-      { path: 'revisar-equipo/:id', component: RevisarEquipoComponent },
-      { path: 'revisar-equipo/:folio', component: NuevaReparacionComponent },
-      { path: 'estadisticas', component: AnalyticsDashboardComponent },
-      { path: 'recibo/:id', component: ReciboImpresionComponent },
-      { path: 'catalogo', component: CatalogoRefaccionesComponent },
-      { path: 'caja', component: CorteCajaComponent }
-    ]
-  },
-  // Comodín por si hay un error en la URL
-  { path: '**', redirectTo: 'dashboard' }
+  { path: '', redirectTo: '/mesas', pathMatch: 'full' },
+  { path: 'mesas', component: MapaMesasComponent },
+  { path: 'comanda/:ordenId', component: ComandaComponent }, 
+  { path: 'admin-menu', component: MenuAdminComponent },
+  { path: 'caja/:ordenId', component: CajaComponent },
+  { path: 'facturacion', component: FacturacionComponent },
+  { path: 'corte-caja', component: CorteCajaComponent }
 ];
