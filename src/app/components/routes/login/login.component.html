@@ -1,0 +1,39 @@
+<section id="login-content" class="use-dark-mode">
+
+  <header></header>
+
+  <article>
+    <div class="login-element-container">
+      <img [src]="logoSrc()" alt="Logo"  class="company-logo" />
+    </div>
+    <div class="login-element-container">
+        <h1>Inicia sesión.</h1>
+    </div>
+    <div class="login-element-container">
+        <p>Inicia sesión con Active Directory.</p>
+    </div>
+    <div class="p-d-flex p-flex-column p-ai-center p-mt-1">
+      <div class="login-element-container">
+        <p-button
+          label="Iniciar sesión"
+          (onClick)="appService.loginRedirect()"
+          styleClass="p-button-primary"
+          [disabled]="appService.isLoadingAD()"
+        ></p-button>
+      </div>
+    </div>  
+    <div>
+        <p>
+            Acceso restringido a usuarios autorizados.
+        </p>
+    </div>
+  </article>
+
+  <footer>
+      <p class="neutral">{{footerTitle()}}</p>
+  </footer>
+
+</section>
+<section id="banner-content">
+  <img [src]="bannerSrc()" alt="CoppelframeworkWebclientAngularspa18">
+</section>

@@ -1,0 +1,733 @@
+/*
+=====================
+>>>>>>>>>>>>>Utilities 👾
+=====================
+*/
+:root{
+  --size-tablet: 700px;
+  --size-mobile: 500px;
+  --size-smmobile: 300px;
+}
+
+.box-shadow{
+    box-shadow: 0 6px 24px rgba(25,75,123,0.18);
+}
+
+
+/*
+=====================
+>>>>>>>>>>>>>FONTS ㊗️
+=====================
+*/
+@font-face {
+    font-family: "Circular";
+    src: url("/assets/fonts/CircularStd-Bold.eot"); /* IE9 Compat Modes */
+    src: url("/assets/fonts/CircularStd-Bold.eot?#iefix") format("embedded-opentype"),
+        /* IE6-IE8 */ url("/assets/fonts/CircularStd-Bold.woff2") format("woff2"),
+        /* Super Modern Browsers */ url("/assets/fonts/CircularStd-Bold.woff")
+            format("woff"),
+        /* Pretty Modern Browsers */ url("/assets/fonts/CircularStd-Bold.ttf")
+            format("truetype"),
+        /* Safari, Android, iOS */
+            url("/assets/fonts/CircularStd-Bold.svg#svgFontName") format("svg"); /* Legacy iOS */
+}
+
+@font-face {
+    font-family: "HelveticaNeue";
+    src: url("/assets/fonts/HelveticaNeue.eot"); /* IE9 Compat Modes */
+    src: url("/assets/fonts/HelveticaNeue.eot?#iefix") format("embedded-opentype"),
+        /* IE6-IE8 */ url("/assets/fonts/HelveticaNeue.woff2") format("woff2"),
+        /* Super Modern Browsers */ url("/assets/fonts/HelveticaNeue.woff")
+            format("woff"),
+        /* Pretty Modern Browsers */ url("/assets/fonts/HelveticaNeue.ttf")
+            format("truetype"),
+        /* Safari, Android, iOS */ url("/assets/fonts/HelveticaNeue.svg#svgFontName")
+            format("svg"); /* Legacy iOS */
+}
+
+@font-face {
+    font-family: "HelveticaNeue-Bold";
+    src: url("/assets/fonts/HelveticaNeueBold.eot"); /* IE9 Compat Modes */
+    src: url("/assets/fonts/HelveticaNeueBold.eot?#iefix") format("embedded-opentype"),
+        /* IE6-IE8 */ url("/assets/fonts/HelveticaNeueBold.woff2") format("woff2"),
+        /* Super Modern Browsers */ url("/assets/fonts/HelveticaNeueBold.woff")
+            format("woff"),
+        /* Pretty Modern Browsers */ url("/assets/fonts/HelveticaNeueBold.ttf")
+            format("truetype"),
+        /* Safari, Android, iOS */
+            url("/assets/fonts/HelveticaNeueBold.svg#svgFontName") format("svg"); /* Legacy iOS */
+}
+
+
+
+body{
+color: var(--black);
+}
+
+.display,h1,h2,h3,h4{
+font-weight: bold;
+font-family: "Circular"
+}
+.display{font-size: var(--display);}
+h1{font-size: var(--h1);}
+h2{font-size: var(--h2);}
+h3{font-size: var(--h3);}
+h4{font-size: var(--h4);}
+
+
+p,div{
+  font-size: var(--body);
+  font-family: "HelveticaNeue";
+  line-height: 1.4em;
+  letter-spacing: .9px;
+}
+
+.bold{
+font-family: "HelveticaNeue-Bold";
+}
+
+small,.small{ font-size: var(--small)}
+.caption{ font-size: var(--caption)}
+
+
+a{
+color: var(--primary);
+text-decoration: none;
+}
+
+/*
+=====================
+>>>>>>>>>>>>>COLORS ㊗️
+=====================
+*/
+
+.background{
+background-color: var(--background);
+}
+
+.primary {color: var(--primary)}
+.complementary {color: var(--complementary)}
+.black {color: var(--black)}
+.neutral {color: var(--neutral)}
+.white {color: var(--white)}
+.error {color: var(--error)}
+.success {color: var(--success)}
+.warning {color: var(--warning)}
+.info {color: var(--info)}
+.sales {color: var(--sales)}
+
+.primary-bg {background-color: var(--primary)}
+.complementary-bg {background-color: var(--complementary)}
+.black-bg {background-color: var(--black)}
+.neutral-bg {background-color: var(--neutral)}
+.white-bg {background-color: var(--white)}
+.background-bg {background-color: var(--background)}
+.error-bg {background-color: var(--error)}
+.success-bg {background-color: var(--success)}
+.warning-bg {background-color: var(--warning)}
+.info-bg {background-color: var(--info)}
+.sales-bg {background-color: var(--sales)}
+
+/*
+=====================
+>>>>>>>>>>>>>BORDERS ㊗️
+=====================
+*/
+
+.error-border{border:1px solid var(--error)}
+.success-border{border:1px solid var(--success)}
+.warning-border{border:1px solid var(--warning)}
+.info-border{border:1px solid var(--info)}
+.sales-border{border:1px solid var(--sales)}
+
+
+
+
+
+/*
+=====================
+>>>>>>>>>>>>>BUTTON㊗️
+=====================
+*/
+button{
+border: 0px;
+border-radius: 30px;
+cursor: pointer;
+transition: .5s all;
+font-weight: bold;
+
+}
+
+
+button.primary-button{
+  padding: 16px 32px;
+  color: var(--white);
+  background-color: var(--primary)!important;
+  min-width: 180px;
+}
+
+
+button.secondary-button{
+  padding: 16px 32px;
+  color: var(--primary);
+
+  border:1px solid var(--primary)!important;
+  background-color: var(--white);
+  min-width: 180px;
+
+}
+
+
+button.tertiary-button{
+color: var(--primary);
+background: none;
+}
+
+button.icon-button{
+  background-color: var(--primary);
+  height: 48px;
+  width: 48px;
+  padding: var(--s-unit-2)
+}
+
+
+
+
+/* HOVER */
+
+
+button.primary-button:hover,button.icon-button:hover{
+  background-color: var(--primary-hover);
+}
+
+button.tertiary-button:hover{
+  color: var(--primary-hover);
+}
+
+
+
+
+
+body a{
+color: var(--primary);
+font-family: HelveticaNeue-Bold;
+}
+
+/* Modifiers */
+
+button.primary-button.large ,button.secondary-button.large {
+  padding-left:88px;
+  padding-right:88px;
+}
+/*
+=====================
+>>>>>>>>>>>>>MODALBOX㊗️
+=====================
+*/
+
+
+.modalbox{
+display: flex;
+flex-direction: column;
+flex-wrap: wrap;
+text-align: center;
+background-color: white;
+border-radius: var(--s-unit-2);
+padding: var(--s-unit-4);
+overflow-x: scroll;
+}
+
+.modalbox :first-child {
+margin-left: auto;
+}
+
+.modalbox button{
+margin-left: auto;
+margin-right: auto;
+font-size: var(--body);
+}
+
+.modalbox .modal-text{
+
+}
+
+.modalbox .modal-cross{
+
+}
+
+
+
+/*
+=====================
+>>>>>>>>>>>>>FORMS & INPUTS㊗️
+=====================
+*/
+
+.form-coppel{
+display: flex;
+flex-direction: column;
+}
+
+
+/*
+==========
+>>SELECT
+=========
+*/
+
+.select {
+ position: relative;
+ overflow: hidden;
+ margin: auto;
+ width: 100%;
+ height: 100%;
+ border-radius: var(--s-unit);
+border:1px solid var(--neutral);
+ font-size: var(--body);
+}
+
+.select > i.toggle {
+ position: absolute;
+ z-index: 4;
+ right: 1.5em;
+ top: 1.6em;
+ color: #ccc;
+}
+.select .title, .select .placeholder {
+ position: relative;
+ display: block;
+ width: 100%;
+ height: 100%;
+ padding: 14px;
+ background: var(--white);
+ border-top: 1px solid var(--white);
+ cursor: pointer;
+}
+.select > input {
+ position: absolute;
+ left: 0px;
+ top: 0px;
+ z-index: 1;
+ width: 100%;
+ height: 100%;
+ display: block;
+ opacity: 0;
+ cursor: pointer;
+}
+.select > input:checked ~ i.toggle.icon-arrow-down {
+ display: none;
+}
+.select > input:checked ~ i.toggle.icon-arrow-up {
+ display: block;
+}
+.select > input:checked div.options label.option .title {
+ display: none !important;
+}
+.select > input:not(:checked) {
+ z-index: 4;
+}
+.select > input:not(:checked) ~ label.option > span.title {
+ display: none;
+}
+.select > input:not(:checked) ~ i.toggle.icon-arrow-up {
+ display: none;
+}
+.select > input:not(:checked) ~ i.toggle.icon-arrow-down {
+ display: block;
+}
+.select > input:disabled {
+ cursor: no-drop;
+}
+.select > span.placeholder {
+ position: relative;
+ z-index: 0;
+ display: inline-block;
+ width: 100%;
+ border-top: 0px;
+}
+
+.select > span.placeholder:hover{
+border: 1px solid var(--primary);
+border-radius: 8px;
+}
+.select label.option {
+ display: block;
+ overflow: hidden;
+ z-index: 1;
+ width: 100%;
+ transition: all 1s ease-out;
+}
+.select label.option span.title {
+ position: relative;
+ z-index: 2;
+ transition: background 0.3s ease-out;
+}
+.select label.option span.title i.icon {
+ padding-right: 8px;
+ color: rgba(146, 168, 209, 1);
+}
+.select label.option span.title:hover {
+ color: var(--black);
+ background: rgba(255, 255, 255, .3);
+}
+.select label.option input {
+ display: none;
+}
+.select label.option input:checked ~ span.title {
+ position: absolute;
+ display: block;
+ z-index: 3;
+ top: 0px;
+ font-size: var(--body);
+ background: var(--white);
+ border-top: 0px;
+ box-shadow: none;
+ color: inherit;
+ width: 100%;
+}
+.select label.option input:disabled ~ span.title {
+ background: #f9f9f9 !important;
+ color: #aaa;
+}
+.select label.option input:disabled ~ span.title:hover {
+ color: #aaa;
+ background: none;
+ cursor: no-drop;
+}
+/*
+==========
+>>LOADER
+=========
+*/
+
+.loader{
+flex-direction: row;
+}
+.loader input[type=text]{
+width: 100%;
+}
+
+
+.form-coppel input[type=file]{
+  display: none;
+}
+
+.form-coppel  label.file{
+border: 0px;
+border-radius: 30px;
+cursor: pointer;
+transition: .5s all;
+font-weight: 600;
+padding: 16px 32px;
+color: var(--white);
+background-color: var(--primary);
+font-size: var(--body);
+
+}
+
+/*
+==========
+>>INPUT TEXT
+=========
+*/
+
+input{
+transition: .4s all;
+}
+
+input,select,textarea{
+border: 1px solid var(--neutral);
+border-radius: var(--s-unit);
+padding: 14px;
+font-size: var(--body);
+color: var(--black);
+}
+
+input:focus,input:active{
+border: 1px solid var(--primary);
+}
+
+input[type=date]{
+font-family: HelveticaNeue;
+font-size: var(--body);
+}
+
+
+
+/*
+==========
+>>CHECKBOX
+=========
+*/
+
+input[type=checkbox] {
+     position: relative;
+       cursor: pointer;
+}
+input[type=checkbox]:before {
+     content: "";
+     display: block;
+     position: absolute;
+     width: 16px;
+     height: 16px;
+     top: 0;
+     left: 0;
+     border: 1px solid var(--neutral);
+     border-radius: 3px;
+     background-color: white;
+}
+input[type=checkbox]:checked:before {
+  background-color: var(--primary);
+}
+input[type=checkbox]:checked:after {
+     content: "";
+     display: block;
+     width: 4px;
+     height: 8px;
+     border: solid white;
+     border-width: 0 1px 1px 0;
+     -webkit-transform: rotate(45deg);
+     -ms-transform: rotate(45deg);
+     transform: rotate(45deg);
+     position: absolute;
+     top: 3px;
+     left: 6px;
+}
+
+
+/*
+==========
+>>Breadcrum
+=========
+*/
+
+
+
+
+
+
+/*
+=====================
+>>>>>>>>>>>>>AVATAR㊗️
+=====================
+*/
+
+
+.avatar {
+background-color: var(--primary);
+/* Rounded border */
+border-radius: 50%;
+
+/* Center the content */
+align-items: center;
+display: inline-flex;
+justify-content: center;
+
+/* Size */
+height: 32px;
+width: 32px;
+color: var(--white);
+}
+
+.avatar.avatar-s{
+height: 32px;
+width: 32px;
+}
+
+.avatar.avatar-m{
+height: 40px;
+width: 40px;
+}
+
+.avatar.avatar-l{
+height: 48px;
+width: 48px;
+}
+
+.avatar-image {
+/* Size */
+height: 50%;
+width: 50%;
+}
+
+/*
+=====================
+>>>>>>>>>>>>>ALERT㊗️
+=====================
+*/
+
+.alert{
+font-size: var(--small);
+color: var(--success);
+padding: var(--s-unit);
+background-color:var(--success-soft);
+border-radius: var(--s-unit);
+display: inline-flex;
+align-items: center;
+}
+
+.alert > *{
+margin-right: 8px;
+}
+
+.alert a{
+display: inline-flex;
+
+}
+
+.alert img{
+max-height: var(--s-unit-2);
+}
+
+
+
+
+/*
+=====================
+>>>>>>>>>>>>>TOOLTIP㊗️
+=====================
+*/
+
+
+.tooltip.open .tooltip-container{
+visibility: visible;
+position: relative;
+}
+
+.tooltip-container{
+visibility: hidden;
+position: absolute;
+padding: var(--s-unit-3);
+background-color: var(--white);
+border-radius: var(--s-unit-2);
+max-width: 318px;
+}
+
+.tooltip h4{
+margin-right: auto;
+margin-block-start: 0;
+margin-block-end: 12px;
+}
+
+.tooltip >label{
+color: var(--primary);
+font-weight: bold;
+cursor: pointer;
+}
+
+.tooltip:hover .tooltip-container{
+visibility: visible;
+
+}
+
+/*
+=====================
+>>>>>>>>>>>>>STEPPER㊗️
+=====================
+*/
+
+
+
+.stepper{
+padding: var(--s-unit-2);
+display: flex;
+}
+
+.stepper .stepper-group{
+display: flex;
+margin-right: 4px;
+align-items: center;
+}
+
+.stepper .stepper-step{
+height: 32px;
+width: 32px;
+border-radius: 50%;
+display: flex;
+justify-content: center;
+align-items: center;
+
+margin-right: 4px;
+}
+
+.stepper-step .checked-step{
+content: "";
+display: block;
+width: 4px;
+height: 8px;
+border: solid white;
+border-width: 0 1px 1px 0;
+-webkit-transform: rotate(45deg);
+-ms-transform: rotate(45deg);
+transform: rotate(45deg);
+top: 3px;
+left: 6px;
+}
+
+.stepper .stepper-line{
+border-top:solid 1px var(--primary);
+width: 3em;
+height: 0px;
+margin:0 8px;
+}
+
+.stepper .stepper-text{
+display: flex;
+flex-direction: column;
+margin-right: 4px;
+
+}
+/*
+=====================
+>>>>>>>>>>>>>PROGRESS BAR㊗️
+=====================
+*/
+
+
+
+
+
+.bar,  .progress{
+width: 100%;
+height: var(--s-unit);
+border-radius: 8px;
+transition: .5s all;
+}
+
+.progress{
+background-color: var(--primary);
+margin-top: -8px;
+}
+
+.bar{
+background-color: var(--neutral);
+}
+
+.barPercent{
+display: flex;
+justify-content: center;
+align-items: center;
+}
+
+.progressBar.barPercent .groupBar{
+width: 90%;
+}
+
+.progressBar.barPercent label{
+width: 10%;
+}
+
+
+/*
+=====================
+>>>>>>>>>>>>>CARD㊗️
+=====================
+*/
+
+div.card{
+background-color: var(--white);
+padding:var(--s-unit-5);
+border-radius: var(--s-unit-2)
+}
+
+

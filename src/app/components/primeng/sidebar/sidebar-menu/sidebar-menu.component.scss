@@ -1,0 +1,38 @@
+
+.menuItem {
+    align-items: center;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    color: var(--primary-hover);
+    
+    &:hover {
+        background-color: var(--background);
+        color: var(--primary-hover);
+    }
+
+    &.selected-title {
+        background-color: var(--background-office);
+        font-weight: 700;
+    }
+
+    i {
+        margin-right: var(--s-unit-2);
+    }
+}
+
+.menuItemTitle {
+    flex-grow: 1;
+    font-size: 14px;
+    font-weight: 700 !important;
+    line-height: var(--s-unit-3);
+    text-align: left;
+
+    &:hover {
+        color: var(--primary-hover);
+    }
+}
+.submenuList {
+    padding: 4px 12px;
+}

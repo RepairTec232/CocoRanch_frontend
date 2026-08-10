@@ -1,0 +1,31 @@
+<div [ngClass]="appService.getThemeClass('search-input-container')">
+    <span [ngClass]="getClassIcon()">
+      <i 
+        class="pi pi-search"
+        [ngClass]="appService.getThemeClass('search-icon')"
+      ></i>
+      <input
+        type="text"
+        [value]="searchQuery()"
+        (input)="onInputChange($event)"
+        [placeholder]="getPlaceholder()"
+        [ngClass]="appService.getThemeClass('search-input')"
+        (focus)="onFocus()"
+        (blur)="onBlur()"
+      />
+    </span>
+    <ul *ngIf="isInputActive() && filteredOptions().length > 0" [ngClass]="appService.getThemeClass('filtered-options')">
+      <div class="search-header-container">
+          <span [ngClass]="appService.getThemeClass('search-header-label')">
+              Rutas
+          </span>
+      </div>
+      <li
+        *ngFor="let option of filteredOptions()"
+        (click)="onOptionSelect(option.value)"
+      >
+        {{ option.label }}
+      </li>
+    </ul>
+</div>
+  

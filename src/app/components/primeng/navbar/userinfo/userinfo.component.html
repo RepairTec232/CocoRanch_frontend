@@ -1,0 +1,9 @@
+<div class="account-container">
+    <div class="account-avatar-container">
+        <app-avatar [fullName]="appService.activeAccount()?.name" [image]="appService.userProfilePicture()"></app-avatar>
+    </div> 
+    <div class="account-data">
+        <span [ngClass]="appService.getThemeClass('account-name')">{{ appService.activeAccount()?.name }}</span>
+        <span class="account-center">{{ appService.activeAccount()?.username }}</span>
+    </div>
+</div>

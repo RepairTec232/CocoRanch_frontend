@@ -1,0 +1,37 @@
+/* SCSS Para estilos globales */
+
+html, body {
+    height: 100%;
+    margin: 0;
+    background-color: var(--background);
+}
+
+input {
+    outline: none;
+}
+.use-dark-mode {
+    background-color: var(--background);
+    color: var(--text);
+}
+
+
+
+.sidebar {
+  background-color: var(--white);
+  width: 248px;
+  :global(.p-sidebar-content) {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 0;
+  }
+
+  &.hideHeader {
+    :global(.p-sidebar-header) {
+      display: none;
+    }
+  }
+}
+
+
+

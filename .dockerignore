@@ -1,0 +1,17 @@
+# Ignorar la carpeta de dependencias de Node
+node_modules/
+
+# Ignorar archivos de log de npm y yarn
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Ignorar el repositorio Git
+.git
+.gitignore
+
+# Opcional: Ignorar archivos de entorno locales
+.env
+
+# Opcional: Ignorar la carpeta de salida (si se genera localmente y no se requiere)
+dist/

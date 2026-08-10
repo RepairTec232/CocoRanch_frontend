@@ -1,0 +1,10 @@
+<app-navbar 
+    *ngIf="includeNavBar()" 
+    [type]="appService.navbarType.bind(this)" 
+    [logoSrc]="logoSrc.bind(this)"
+></app-navbar>
+<app-progress-bar [show]="appService.isLoadingAD()"></app-progress-bar>
+<router-outlet 
+    *ngIf="!appService.isLoadingAD() || (!includeNavBar() && !appService.activeAccount()) || (appService.activeAccount())"
+></router-outlet>
+<app-sidebar [menuItems]="sidebarData" [hideHeader]="hideHeader"></app-sidebar>

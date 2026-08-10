@@ -1,0 +1,341 @@
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card shadow border-0">
+        <div class="card-header bg-dark text-white p-3">
+          <h3 class="mb-0">
+            <i class="bi bi-cash-stack me-2"></i> Corte de Caja - Fin de Turno
+          </h3>
+        </div>
+
+        <div class="card-body p-4">
+          <div class="row mb-4">
+            <div class="col-md-6 border-end">
+              <h5 class="text-muted mb-3">1. Declaración del Cajero</h5>
+
+              <div class="mb-3">
+                <label class="form-label fw-bold">Fondo Inicial en Caja</label>
+                <div class="input-group">
+                  <span class="input-group-text">$</span>
+                  <input
+                    type="number"
+                    class="form-control"
+                    [(ngModel)]="fondoInicial"
+                  />
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label fw-bold text-primary"
+                  >Efectivo Físico Contado</label
+                >
+                <div class="input-group input-group-lg">
+                  <span class="input-group-text bg-primary text-white">$</span>
+                  <input
+                    type="number"
+                    class="form-control border-primary fw-bold"
+                    [(ngModel)]="efectivoFisico"
+                    placeholder="0.00"
+                  />
+                </div>
+                <small class="text-muted"
+                  >Cuenta billetes y monedas en el cajón.</small
+                >
+              </div>
+            </div>
+
+            <div class="col-md-6 ps-4">
+              <h5 class="text-muted mb-3">2. Resumen del Sistema</h5>
+
+              <ul class="list-group list-group-flush mb-3">
+                <li class="list-group-item d-flex justify-content-between px-0">
+                  <span>Ventas en Efectivo:</span>
+                  <strong>${{ ventasEfectivo | number: "1.2-2" }}</strong>
+                </li>
+                <li class="list-group-item d-flex justify-content-between px-0">
+                  <span>Ventas con Tarjeta:</span>
+                  <strong>${{ ventasTarjeta | number: "1.2-2" }}</strong>
+                </li>
+                <li
+                  class="list-group-item d-flex justify-content-between px-0 text-success"
+                >
+                  <span>Propinas Registradas:</span>
+                  <strong>${{ propinas | number: "1.2-2" }}</strong>
+                </li>
+                <li
+                  class="list-group-item d-flex justify-content-between px-0 bg-light mt-2 fw-bold fs-5"
+                >
+                  <span>Efectivo Esperado en Cajón:</span>
+                  <span class="text-primary"
+                    >${{ totalEfectivoEsperado | number: "1.2-2" }}</span
+                  >
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div
+            class="alert mt-4 rounded-3 text-center shadow-sm"
+            [ngClass]="{
+              'alert-success': diferencia === 0,
+              'alert-warning': diferencia > 0,
+              'alert-danger': diferencia < 0,
+            }"
+          >
+            <h4 class="mb-0">
+              <span *ngIf="diferencia === 0">
+                <i class="bi bi-check-circle-fill"></i> Caja Cuadrada
+                Perfectamente
+              </span>
+              <span *ngIf="diferencia > 0">
+                <i class="bi bi-exclamation-triangle-fill"></i> Sobrante en
+                caja: +${{ diferencia | number: "1.2-2" }}
+              </span>
+              <span *ngIf="diferencia < 0">
+                <i class="bi bi-x-circle-fill"></i> Faltante en caja: -${{
+                  diferencia * -1 | number: "1.2-2"
+                }}
+              </span>
+            </h4>
+          </div>
+        </div>
+
+        <div class="card-footer bg-light p-3 text-end">
+          <button
+            class="btn btn-success btn-lg fw-bold px-4"
+            (click)="guardarCorteCajaDefinitivo()"
+          >
+            <i class="bi bi-calendar-check-fill me-2"></i> Realizar Corte de
+            Caja
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card border-0 bg-light shadow-sm rounded-3 mb-4 mt-4">
+    <div
+      class="card-header bg-secondary text-white fw-bold d-flex justify-content-between align-items-center"
+    >
+      <span
+        ><i class="bi bi-clock-history me-2"></i> Auditoría de Ventas en el
+        Turno (Antes del Corte)</span
+      >
+      <span class="badge bg-dark">{{ pedidosDelDia.length }} Artículos</span>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive" style="max-height: 300px; overflow-y: auto">
+        <table
+          class="table table-hover table-striped align-middle mb-0 text-center"
+        >
+          <thead class="table-dark small text-uppercase">
+            <tr>
+              <th>Ticket</th>
+              <th>Mesa</th>
+              <th>Fecha / Hora</th>
+              <th class="text-start">Producto</th>
+              <th>Cant.</th>
+              <th>Pago</th>
+              <th class="text-end pe-4">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngIf="pedidosDelDia.length === 0">
+              <td colspan="7" class="text-center text-muted py-3">
+                <i class="bi bi-info-circle me-1"></i> No se han registrado
+                ventas en este turno todavía.
+              </td>
+            </tr>
+
+            <tr *ngFor="let item of pedidosDelDia">
+              <td class="fw-bold text-muted">#{{ item.id }}</td>
+              <td>
+                <span class="badge bg-dark">Mesa {{ item.mesaNumero }}</span>
+              </td>
+              <td class="small">
+                <i class="bi bi-calendar-event text-muted"></i> {{ item.fecha }}
+                <br />
+                <i class="bi bi-clock text-primary"></i>
+                <span class="fw-bold">{{ item.hora }}</span>
+              </td>
+              <td class="text-start fw-bold text-dark">
+                {{ item.productoNombre }}
+              </td>
+              <td class="fw-bold">{{ item.cantidad }}</td>
+              <td>
+                <span
+                  class="badge"
+                  [ngClass]="
+                    item.metodoPago === 'EFECTIVO'
+                      ? 'bg-success'
+                      : 'bg-info text-dark'
+                  "
+                >
+                  {{ item.metodoPago || "EFECTIVO" }}
+                </span>
+              </td>
+              <td class="fw-bold text-success text-end pe-4">
+                ${{ item.totalArticulo | number: "1.2-2" }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="row justify-content-center mt-5">
+    <div class="col-md-10">
+      <div class="card shadow-sm border-0">
+        <div class="card-header bg-secondary text-white p-3">
+          <h5 class="mb-0">
+            <i class="bi bi-clock-history me-2"></i> Historial de Cortes
+            Archivados
+          </h5>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-light text-muted small text-uppercase">
+                <tr>
+                  <th class="ps-3">ID / Fecha</th>
+                  <th>Efectivo</th>
+                  <th>Tarjeta</th>
+                  <th>Propinas</th>
+                  <th>Faltante/Sobrante</th>
+                  <th class="text-end pe-3">Gran Total</th>
+                  <th class="text-center pe-3">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <ng-container
+                  *ngFor="let corte of historialCortes.slice().reverse()"
+                >
+                  <tr>
+                    <td class="ps-3 fw-bold">
+                      #{{ corte.id }} <br /><small class="text-muted">{{
+                        corte.fecha
+                      }}</small>
+                    </td>
+                    <td class="text-success">
+                      ${{ corte.totalEfectivo | number: "1.2-2" }}
+                    </td>
+                    <td class="text-info">
+                      ${{ corte.totalTarjeta | number: "1.2-2" }}
+                    </td>
+                    <td class="text-warning">
+                      ${{ corte.totalPropinas | number: "1.2-2" }}
+                    </td>
+                    <td>
+                      <span
+                        class="badge"
+                        [ngClass]="
+                          corte.diferencia === 0
+                            ? 'bg-success'
+                            : corte.diferencia > 0
+                              ? 'bg-warning text-dark'
+                              : 'bg-danger'
+                        "
+                      >
+                        {{ corte.diferencia > 0 ? "+" : "" }}${{
+                          corte.diferencia | number: "1.2-2"
+                        }}
+                      </span>
+                    </td>
+                    <td class="text-end pe-3 fw-bold text-primary">
+                      ${{ corte.granTotal | number: "1.2-2" }}
+                    </td>
+                    <td class="text-center pe-3">
+                      <button
+                        class="btn btn-sm btn-outline-danger fw-bold shadow-sm me-1"
+                        (click)="imprimirTicket(corte)"
+                      >
+                        <i class="bi bi-printer-fill me-1"></i> Imprimir
+                      </button>
+                      <button
+                        class="btn btn-sm btn-outline-info fw-bold"
+                        (click)="verDetalleVentas(corte.id)"
+                      >
+                        <i class="bi bi-list-ul"></i> Ver Ventas
+                      </button>
+                    </td>
+                  </tr>
+
+                  <tr *ngIf="corteSeleccionadoId === corte.id" class="bg-light">
+                    <td colspan="7" class="p-4">
+                      <h6 class="fw-bold text-primary mb-3">
+                        <i class="bi bi-box-seam"></i> Desglose de Artículos
+                        Vendidos (Corte #{{ corte.id }})
+                      </h6>
+                      <div
+                        class="table-responsive bg-white shadow-sm rounded border"
+                      >
+                        <table class="table table-sm table-hover mb-0">
+                          <thead class="table-secondary">
+                            <tr>
+                              <th># Pedido</th>
+                              <th>Fecha</th>
+                              <th>Hora</th>
+                              <th>Producto</th>
+                              <th class="text-center">Cantidad</th>
+                              <th class="text-end">Precio Unit.</th>
+                              <th class="text-end">Total</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr *ngIf="articulosVendidos.length === 0">
+                              <td
+                                colspan="7"
+                                class="text-center text-muted py-3"
+                              >
+                                No hay productos registrados en este corte.
+                              </td>
+                            </tr>
+                            <tr *ngFor="let item of articulosVendidos">
+                              <td class="fw-bold text-muted">
+                                Orden {{ item.pedidoId }}
+                              </td>
+
+                              <td>
+                                <span class="badge bg-light text-dark border"
+                                  ><i class="bi bi-calendar-event me-1"></i>
+                                  {{ item.fechaVenta }}</span
+                                >
+                              </td>
+
+                              <td>
+                                <span class="badge bg-light text-primary border"
+                                  ><i class="bi bi-clock me-1"></i>
+                                  {{ item.horaVenta }}</span
+                                >
+                              </td>
+
+                              <td class="fw-bold">{{ item.producto }}</td>
+                              <td class="text-center">{{ item.cantidad }}</td>
+                              <td class="text-end">
+                                ${{ item.precio | number: "1.2-2" }}
+                              </td>
+                              <td class="text-end text-success fw-bold">
+                                ${{ item.total | number: "1.2-2" }}
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </td>
+                  </tr>
+                </ng-container>
+
+                <tr *ngIf="historialCortes.length === 0">
+                  <td colspan="7" class="text-center py-4 text-muted">
+                    Aún no hay cortes de caja registrados en el sistema.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

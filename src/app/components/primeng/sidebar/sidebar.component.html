@@ -1,0 +1,39 @@
+<ng-content
+    style="width: auto;"
+>
+    <p-sidebar
+        [class]="getSidebarClass()"
+        [(visible)]="appService.isSidebarMenuVisible"
+        (onHide)="this.activeMenuPath = []"
+    >
+        <div class="sidebarContent">
+            <app-sidebar-menu 
+                [menuItems]="menuItems" 
+                [onMenuChange]="this.onMenuChange.bind(this)" 
+                [activeMenuPath]="activeMenuPath"
+            />
+        </div>
+        <div class="footerContent">
+            <div class="closeSidebarBtn" (click)="this.onCloseSidebar()">
+                <app-svg 
+                    [path]="ArrowLeftIconPath" 
+                    [fillColor]="'#2881b3'"
+                />
+            </div>
+        </div>
+        <div *ngIf="activeMenuPath.length>0" class="extendedSidebar">
+            <ng-container *ngFor="let menuItem of activeMenuPath; let i = index">
+                <ul [class]="this.activeMenuPath.length > 1 ? 'submenuContainer display-right-line' : 'submenuContainer'">
+                    <h3 class="itemTitle">{{ menuItem.title }}</h3>
+                    <app-sidebar-menu
+                        *ngIf="menuItem.items"
+                        [menuItems]="menuItem.items"
+                        [activeMenuPath]="activeMenuPath.slice(i + 1)"
+                        [indexSubMenu]="i"
+                        [onMenuChangeExtended]="this.onMenuChangeExtended.bind(this)"
+                    ></app-sidebar-menu>
+                </ul>
+            </ng-container>
+        </div>
+    </p-sidebar>
+</ng-content>
