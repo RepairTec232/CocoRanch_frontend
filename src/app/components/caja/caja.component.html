@@ -135,11 +135,6 @@
             <strong>${{ subtotal | number: "1.2-2" }}</strong>
           </div>
 
-          <div class="d-flex justify-content-between align-items-center mb-2 text-danger fs-5" *ngIf="comision > 0">
-            <span>Comisión Bancaria (4%):</span>
-            <strong>+${{ comision | number: "1.2-2" }}</strong>
-          </div>
-
           <div class="d-flex justify-content-between align-items-center mb-4 text-success fs-5" *ngIf="propina > 0">
             <span>Propina (Opcional):</span>
             <strong>+${{ propina | number: "1.2-2" }}</strong>

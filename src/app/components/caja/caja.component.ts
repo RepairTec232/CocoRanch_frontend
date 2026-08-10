@@ -18,7 +18,6 @@ export class CajaComponent implements OnInit {
 
   metodoPago: 'EFECTIVO' | 'TARJETA' = 'EFECTIVO';
   propina: number = 0;
-  porcentajeComisionTarjeta = 0.04; // 4%
 
   porcentajeSeleccionado: number | string = 0;
 
@@ -50,17 +49,10 @@ export class CajaComponent implements OnInit {
     return this.ordenActiva ? this.ordenActiva.subtotal : 0;
   }
 
-  get comision(): number {
-    if (this.metodoPago === 'TARJETA') {
-      return this.subtotal * this.porcentajeComisionTarjeta;
-    }
-    return 0;
-  }
-
   get totalFinal(): number {
     // Si la propina queda vacía temporalmente en el input, la tomamos como 0
     const propinaLimpia = this.propina && this.propina > 0 ? this.propina : 0;
-    return this.subtotal + propinaLimpia + this.comision;
+    return this.subtotal + propinaLimpia;
   }
 
   seleccionarMetodo(metodo: 'EFECTIVO' | 'TARJETA'): void {
