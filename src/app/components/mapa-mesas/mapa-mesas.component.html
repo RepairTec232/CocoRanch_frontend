@@ -1,6 +1,13 @@
 <div class="container mt-4">
-  <h2 class="mb-4">Mapa de Mesas - CocoRanch</h2>
+  <!-- Cabecera y Botón -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Mapa de Mesas - CocoRanch</h2>
+    <button class="btn btn-primary" (click)="abrirNuevoPedido()">
+      + Agregar Pedido (Llevar / Recoger / Espera)
+    </button>
+  </div>
 
+  <!-- SECCIÓN: MAPA DE MESAS -->
   <div class="row row-cols-1 row-cols-md-4 g-4">
     <div class="col" *ngFor="let mesa of mesas">
       <div
@@ -20,4 +27,197 @@
       </div>
     </div>
   </div>
+
+  <hr class="my-5" />
+
+  <!-- SECCIÓN: LISTA DE PEDIDOS -->
+  <div class="pedidos-list-container">
+    <h3 class="mb-3">Registro de Pedidos Externos</h3>
+
+    <div class="table-responsive">
+      <table class="table table-striped table-hover align-middle shadow-sm">
+        <thead class="table-dark">
+          <tr>
+            <th>Fecha y Hora</th>
+            <th>Cliente</th>
+            <th>Teléfono</th>
+            <th>Detalle del Pedido</th>
+            <th>Tipo</th>
+            <th>Estatus</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            *ngFor="let p of pedidosExternos"
+            [ngClass]="{ 'table-light text-muted': p.estatus === 'Entregado' }"
+          >
+            <td>{{ p.fecha | date: "short" }}</td>
+            <td>
+              <strong>{{ p.cliente }}</strong>
+            </td>
+            <td>{{ p.telefono || "N/A" }}</td>
+            <td class="text-wrap">
+              {{ p.detalle ? p.detalle : p.detallePedido }}
+            </td>
+            <td>
+              <span class="badge bg-secondary">{{ p.tipo }}</span>
+            </td>
+            <td>
+              <span
+                class="badge"
+                [ngClass]="{
+                  'bg-warning text-dark': p.estatus === 'Pendiente',
+                  'bg-info text-dark': p.estatus === 'Listo',
+                  'bg-success': p.estatus === 'Entregado',
+                }"
+              >
+                {{ p.estatus }}
+              </span>
+            </td>
+            <td>
+              <div class="d-flex gap-2">
+                <!-- Botón de Estatus (el que ya tenías) -->
+                <button
+                  class="btn btn-sm btn-success"
+                  (click)="cambiarEstatus(p)"
+                  [disabled]="p.estatus === 'Entregado'"
+                >
+                  Avanzar
+                </button>
+
+                <!-- NUEVO Botón de Cobrar (Naranja/Warning para destacar) -->
+                <button
+                  class="btn btn-sm btn-warning fw-bold"
+                  *ngIf="p.estatus === 'Listo' || p.estatus === 'Entregado'"
+                  (click)="cobrarPedido(p)"
+                >
+                  <i class="bi bi-cash"></i> Cobrar
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="pedidosExternos.length === 0">
+            <td colspan="7" class="text-center py-4">
+              No hay pedidos pendientes en este momento.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- MODAL PARA NUEVO PEDIDO -->
+  <div class="modal-overlay" *ngIf="mostrarFormulario">
+    <div class="modal-content p-4 rounded shadow">
+      <h3 class="mb-3">Nuevo Pedido Externo</h3>
+
+      <!-- Fila 1: Cliente y Teléfono -->
+      <div class="row">
+        <div class="col-md-7 mb-3">
+          <label class="form-label fw-bold">Nombre a registrar:</label>
+          <input
+            type="text"
+            class="form-control"
+            [(ngModel)]="nuevoPedido.cliente"
+            placeholder="Ej. Juan Pérez"
+          />
+        </div>
+        <div class="col-md-5 mb-3">
+          <label class="form-label fw-bold">Teléfono:</label>
+          <input
+            type="tel"
+            class="form-control"
+            [(ngModel)]="nuevoPedido.telefono"
+            placeholder="Opcional"
+          />
+        </div>
+      </div>
+
+      <!-- Fila 2: Tipo de Pedido -->
+      <div class="mb-3">
+        <label class="form-label fw-bold">Tipo de Pedido:</label>
+        <select class="form-select" [(ngModel)]="nuevoPedido.tipo">
+          <option value="Para llevar">Para llevar</option>
+          <option value="Para recoger">Para recoger</option>
+          <option value="En espera">En espera</option>
+        </select>
+      </div>
+
+      <div class="card p-3 mb-3 border-secondary">
+        <label class="form-label fw-bold text-primary"
+          >Platillos / Bebidas del Menú:</label
+        >
+
+        <div class="d-flex gap-2 mb-3">
+          <!-- Seleccionador del Menú -->
+          <select class="form-select w-75" [(ngModel)]="productoActualId">
+            <option [value]="null">Seleccione un producto...</option>
+            <option *ngFor="let p of menuProductos" [value]="p.id">
+              {{ p.nombre }} - {{ p.precio | currency: "MXN" }}
+            </option>
+          </select>
+
+          <!-- Cantidad -->
+          <input
+            type="number"
+            class="form-control w-25"
+            [(ngModel)]="cantidadActual"
+            min="1"
+            placeholder="Cant."
+          />
+
+          <!-- Botón Agregar -->
+          <button
+            class="btn btn-outline-primary fw-bold"
+            (click)="agregarPlatillo()"
+            [disabled]="!productoActualId"
+          >
+            +
+          </button>
+        </div>
+
+        <!-- Lista Visual de Platillos Agregados -->
+        <ul class="list-group list-group-flush mb-0">
+          <li
+            *ngFor="let item of platillosSeleccionados; let i = index"
+            class="list-group-item d-flex justify-content-between align-items-center px-2 py-1"
+          >
+            <span>
+              <span class="badge bg-secondary me-2">{{ item.cantidad }}x</span>
+              {{ item.producto.nombre }}
+              <small class="text-muted"
+                >({{
+                  item.producto.precio * item.cantidad | currency: "MXN"
+                }})</small
+              >
+            </span>
+            <button
+              class="btn btn-sm btn-outline-danger px-2 py-0"
+              (click)="quitarPlatillo(i)"
+            >
+              <i class="bi bi-x"></i>
+            </button>
+          </li>
+          <li
+            *ngIf="platillosSeleccionados.length === 0"
+            class="list-group-item px-2 py-1 text-muted fst-italic"
+          >
+            Ningún platillo agregado a la orden.
+          </li>
+        </ul>
+      </div>
+
+      <!-- Botones Finales del Modal -->
+      <div class="d-flex justify-content-end gap-2 mt-4">
+        <button class="btn btn-secondary" (click)="mostrarFormulario = false">
+          Cancelar
+        </button>
+        <button class="btn btn-primary fw-bold" (click)="guardarPedido()">
+          Guardar Orden
+        </button>
+      </div>
+    </div>
+  </div>
+  <!-- AQUÍ ES DONDE SE CIERRA EL CONTENEDOR PRINCIPAL -->
 </div>

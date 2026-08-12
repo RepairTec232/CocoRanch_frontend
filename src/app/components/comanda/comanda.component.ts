@@ -38,10 +38,21 @@ export class ComandaComponent implements OnInit {
     this.cargarMenu();
   }
 
-  cargarOrden(): void {
+cargarOrden(): void {
     this.service.getOrdenById(this.ordenId).subscribe({
       next: (data) => {
         this.ordenActiva = data;
+        
+        // Recalcular subtotal en el cliente si viene en cero pero con productos
+        if (this.ordenActiva && this.ordenActiva.detalles) {
+          let suma = 0;
+          this.ordenActiva.detalles.forEach(det => {
+            suma += (det.precioUnitario * det.cantidad);
+          });
+          if (suma > 0) {
+            this.ordenActiva.subtotal = suma;
+          }
+        }
       },
       error: (err) => {
         console.error('Error al cargar la orden:', err);
@@ -50,7 +61,6 @@ export class ComandaComponent implements OnInit {
       },
     });
   }
-
   cargarMenu(): void {
     this.service.getProductos().subscribe((data) => {
       this.menuProductos = data;

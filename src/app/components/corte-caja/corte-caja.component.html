@@ -26,6 +26,32 @@
               </div>
 
               <div class="mb-3">
+                <label class="form-label fw-bold text-danger"
+                  >Gastos / Retiros (Efectivo)</label
+                >
+                <div class="input-group">
+                  <span class="input-group-text bg-danger text-white">$</span>
+                  <input
+                    type="number"
+                    class="form-control border-danger"
+                    [(ngModel)]="gastosGenerales"
+                    placeholder="0.00"
+                  />
+                  <input
+                    type="text"
+                    class="form-control form-control-sm border-danger"
+                    [(ngModel)]="detalleGastos"
+                    placeholder="Ej. Garrafón de agua, Hielo..."
+                    [disabled]="gastosGenerales <= 0"
+                  />
+                </div>
+
+                <small class="text-muted"
+                  >Efectivo tomado para compras del día.</small
+                >
+              </div>
+
+              <div class="mb-3">
                 <label class="form-label fw-bold text-primary"
                   >Efectivo Físico Contado</label
                 >
@@ -61,6 +87,13 @@
                 >
                   <span>Propinas Registradas:</span>
                   <strong>${{ propinas | number: "1.2-2" }}</strong>
+                </li>
+
+                <li
+                  class="list-group-item d-flex justify-content-between px-0 text-danger"
+                >
+                  <span>Gastos del Turno:</span>
+                  <strong>-${{ gastosGenerales | number: "1.2-2" }}</strong>
                 </li>
                 <li
                   class="list-group-item d-flex justify-content-between px-0 bg-light mt-2 fw-bold fs-5"
@@ -202,6 +235,7 @@
                   <th>Efectivo</th>
                   <th>Tarjeta</th>
                   <th>Propinas</th>
+                  <th>Gastos</th>
                   <th>Faltante/Sobrante</th>
                   <th class="text-end pe-3">Gran Total</th>
                   <th class="text-center pe-3">Acciones</th>
@@ -225,6 +259,9 @@
                     </td>
                     <td class="text-warning">
                       ${{ corte.totalPropinas | number: "1.2-2" }}
+                    </td>
+                    <td class="text-danger fw-bold">
+                      -${{ corte.gastos || 0 | number: "1.2-2" }}
                     </td>
                     <td>
                       <span

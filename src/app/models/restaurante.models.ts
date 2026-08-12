@@ -26,11 +26,12 @@ export interface OrdenDetalle {
 
 export interface Orden {
   id: number;
-  mesa: Mesa;
+  mesa?: Mesa | null;
   estado: string;
   subtotal: number;
   total: number;
-  detalles: OrdenDetalle[];
+  detalles?: OrdenDetalle[];
+  clienteExterno?: string;
 }
 
 export interface ClienteFacturacion {

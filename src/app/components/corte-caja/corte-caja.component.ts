@@ -19,6 +19,8 @@ export class CorteCajaComponent implements OnInit {
   // 1. Declaración del Cajero (Inputs manuales)
   fondoInicial: number = 500;
   efectivoFisico: number = 0;
+  gastosGenerales: number = 0;
+  detalleGastos: string = '';
 
   // 2. Resumen del Sistema (Datos dinámicos del Backend)
   ventasEfectivo: number = 0;
@@ -88,7 +90,12 @@ export class CorteCajaComponent implements OnInit {
 
   // Cálculos reactivos para la interfaz
   get totalEfectivoEsperado(): number {
-    return this.fondoInicial + this.ventasEfectivo + this.propinas;
+    return (
+      this.fondoInicial +
+      this.ventasEfectivo +
+      this.propinas -
+      this.gastosGenerales
+    );
   }
 
   get diferencia(): number {
@@ -107,11 +114,14 @@ export class CorteCajaComponent implements OnInit {
         totalTarjeta: this.ventasTarjeta,
         totalPropinas: this.propinas,
         totalComisiones: this.comisiones,
+        gastos: this.gastosGenerales,
+        detalleGastos: this.detalleGastos,
         granTotal:
           this.ventasEfectivo +
           this.ventasTarjeta +
           this.propinas +
-          this.comisiones,
+          this.comisiones -
+          this.gastosGenerales,
         fondoInicial: this.fondoInicial,
         efectivoFisicoContado: this.efectivoFisico,
         diferencia: this.diferencia,
@@ -121,6 +131,8 @@ export class CorteCajaComponent implements OnInit {
         next: (res) => {
           alert('¡Corte de caja guardado con éxito en el histórico!');
           this.efectivoFisico = 0;
+          this.gastosGenerales = 0;
+          this.detalleGastos = '';
           this.obtenerResumenDelDia();
           this.cargarHistorial();
         },
@@ -139,7 +151,7 @@ export class CorteCajaComponent implements OnInit {
     const doc = new jsPDF({
       orientation: 'portrait',
       unit: 'mm',
-      format: [80, 150],
+      format: [80, 160],
     });
 
     // --- ENCABEZADO ---
@@ -169,6 +181,20 @@ export class CorteCajaComponent implements OnInit {
 
     doc.text('PROPINAS REGISTRADAS:', 10, 62);
     doc.text(`$${corte.totalPropinas.toFixed(2)}`, 70, 62, { align: 'right' });
+
+    doc.text('RETIROS / GASTOS:', 10, 68);
+    doc.text(`-$${(corte.gastos || 0).toFixed(2)}`, 70, 68, { align: 'right' });
+    if (corte.detalleGastos) {
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'italic');
+      // Imprime el motivo justo debajo del monto del gasto
+      doc.text(`Motivo: ${corte.detalleGastos}`, 10, 72);
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+    }
+    doc.text('--------------------------------------------------', 40, 74, {
+      align: 'center',
+    });
 
     doc.text('--------------------------------------------------', 40, 68, {
       align: 'center',

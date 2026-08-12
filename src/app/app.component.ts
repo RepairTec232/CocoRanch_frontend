@@ -6,6 +6,7 @@ import {
 } from '@azure/msal-angular';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
+import { FormsModule } from '@angular/forms';
 
 @Component({
     selector: 'app-root',
@@ -16,7 +17,8 @@ import { ToastModule } from 'primeng/toast';
         RouterOutlet,
         RouterModule,
         CommonModule,
-        ToastModule
+        ToastModule,
+        FormsModule
     ],
     providers: [MessageService]
 })

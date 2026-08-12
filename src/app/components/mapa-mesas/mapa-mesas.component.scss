@@ -1,0 +1,33 @@
+/* Esto asegura que el fondo oscuro cubra toda la pantalla y ponga el modal al frente */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999; /* Z-index altísimo para que pase por encima de todo */
+}
+
+/* Esto centra el cuadro blanco y le da un aspecto profesional */
+.modal-content {
+  background-color: #ffffff;
+  padding: 30px;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  z-index: 10000;
+  position: relative; /* Lo mantiene dentro de su contenedor flex */
+}
+
+/* Opcional: Ajustes rápidos de botones para el modal */
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
