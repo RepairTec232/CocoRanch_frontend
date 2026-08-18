@@ -25,6 +25,7 @@ export class CorteCajaComponent implements OnInit {
   // 2. Resumen del Sistema (Datos dinámicos del Backend)
   ventasEfectivo: number = 0;
   ventasTarjeta: number = 0;
+  ventasTransferencia: number = 0;
   propinas: number = 0;
   comisiones: number = 0;
 
@@ -34,6 +35,15 @@ export class CorteCajaComponent implements OnInit {
   corteSeleccionadoId: number | null = null;
 
   pedidosDelDia: any[] = [];
+
+  filtroActivo: 'HOY' | 'SEMANA' | 'MES' | 'TODOS' = 'HOY';
+
+  gastosDelTurno: any[] = [];
+  nuevoGasto = { descripcion: '', monto: null };
+  auditoria: { gastosEliminados: any[]; ventasCanceladas: any[] } = {
+    gastosEliminados: [],
+    ventasCanceladas: [],
+  };
 
   constructor(
     private http: HttpClient,
@@ -46,7 +56,42 @@ export class CorteCajaComponent implements OnInit {
     this.obtenerResumenDelDia();
     this.cargarHistorial();
     this.cargarPedidosDelDia();
+    this.cargarGastos();
+    this.cargarAuditoria();
   }
+
+  setFiltro(filtro: 'HOY' | 'SEMANA' | 'MES' | 'TODOS'): void {
+    this.filtroActivo = filtro;
+  }
+
+  get historialFiltrado(): any[] {
+    if (this.filtroActivo === 'TODOS') {
+      return this.historialCortes;
+    }
+
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0); // Normalizamos a la medianoche para evitar desfases
+
+    return this.historialCortes.filter((corte) => {
+      // Ajustamos la fecha agregando 'T00:00:00' para evitar saltos de zona horaria al parsear
+      const fechaCorte = new Date(corte.fecha + 'T00:00:00');
+
+      if (this.filtroActivo === 'HOY') {
+        return fechaCorte.getTime() === hoy.getTime();
+      } else if (this.filtroActivo === 'SEMANA') {
+        const haceUnaSemana = new Date(hoy);
+        haceUnaSemana.setDate(hoy.getDate() - 7);
+        return fechaCorte >= haceUnaSemana && fechaCorte <= hoy;
+      } else if (this.filtroActivo === 'MES') {
+        return (
+          fechaCorte.getMonth() === hoy.getMonth() &&
+          fechaCorte.getFullYear() === hoy.getFullYear()
+        );
+      }
+      return true;
+    });
+  }
+
   cargarPedidosDelDia(): void {
     // Cambia la URL si tu endpoint de Spring Boot se llama de otra forma
     this.http
@@ -68,6 +113,43 @@ export class CorteCajaComponent implements OnInit {
     });
   }
 
+  cargarGastos(): void {
+    this.http.get<any[]>(`${this.apiURL}/gastos-actuales`).subscribe({
+      next: (data) => {
+        this.gastosDelTurno = data;
+        this.gastosGenerales = data.reduce((sum, g) => sum + g.monto, 0); // Calcula automático
+        this.detalleGastos = data.map((g) => g.descripcion).join(', ');
+      },
+    });
+  }
+
+  registrarGasto(): void {
+    if (!this.nuevoGasto.descripcion || !this.nuevoGasto.monto) return;
+    this.http.post(`${this.apiURL}/gastos`, this.nuevoGasto).subscribe(() => {
+      this.nuevoGasto = { descripcion: '', monto: null };
+      this.cargarGastos();
+    });
+  }
+
+  eliminarGasto(id: number): void {
+    if (
+      confirm(
+        '¿Seguro que deseas eliminar este gasto? Se enviará al registro de auditoría.',
+      )
+    ) {
+      this.http.delete(`${this.apiURL}/gastos/${id}`).subscribe(() => {
+        this.cargarGastos();
+        this.cargarAuditoria();
+      });
+    }
+  }
+
+  cargarAuditoria(): void {
+    this.http.get<any>(`${this.apiURL}/auditoria`).subscribe({
+      next: (data) => (this.auditoria = data),
+    });
+  }
+
   // Llama a Spring Boot para traer la suma real de las órdenes PAGADAS
   obtenerResumenDelDia(): void {
     this.http.get<any>(`${this.apiURL}/resumen-hoy`).subscribe({
@@ -75,6 +157,7 @@ export class CorteCajaComponent implements OnInit {
         if (data) {
           this.ventasEfectivo = data.totalEfectivo || 0;
           this.ventasTarjeta = data.totalTarjeta || 0;
+          this.ventasTransferencia = data.totalTransferencias || 0;
           this.propinas = data.totalPropinas || 0;
           this.comisiones = data.totalComisiones || 0;
         }
@@ -112,6 +195,7 @@ export class CorteCajaComponent implements OnInit {
       const payloadCierre = {
         totalEfectivo: this.ventasEfectivo,
         totalTarjeta: this.ventasTarjeta,
+        totalTransferencias: this.ventasTransferencia,
         totalPropinas: this.propinas,
         totalComisiones: this.comisiones,
         gastos: this.gastosGenerales,
@@ -119,6 +203,7 @@ export class CorteCajaComponent implements OnInit {
         granTotal:
           this.ventasEfectivo +
           this.ventasTarjeta +
+          this.ventasTransferencia +
           this.propinas +
           this.comisiones -
           this.gastosGenerales,
@@ -135,6 +220,7 @@ export class CorteCajaComponent implements OnInit {
           this.detalleGastos = '';
           this.obtenerResumenDelDia();
           this.cargarHistorial();
+          window.location.reload();
         },
         error: (err) => {
           alert(
@@ -145,9 +231,8 @@ export class CorteCajaComponent implements OnInit {
     }
   }
 
-  // MÉTODO PARA GENERAR TICKET EN PDF
   imprimirTicket(corte: any): void {
-    // Configuramos el PDF con formato de miniprinter térmica (80mm de ancho x 150mm de alto)
+    // Configuramos el PDF con formato de miniprinter t rnica (80mm de ancho x 150mm de alto)
     const doc = new jsPDF({
       orientation: 'portrait',
       unit: 'mm',
@@ -166,7 +251,12 @@ export class CorteCajaComponent implements OnInit {
     doc.setFontSize(9);
     doc.setFont('helvetica', 'normal');
     doc.text(`Turno ID: #${corte.id}`, 10, 32);
-    doc.text(`Fecha: ${corte.fecha}`, 10, 37);
+    // Agregamos un respaldo visual por si consultas cortes muy viejos que eran null
+    doc.text(
+      `Fecha: ${corte.fecha || new Date().toISOString().split('T')[0]}`,
+      10,
+      37,
+    );
 
     doc.text('--------------------------------------------------', 40, 42, {
       align: 'center',
@@ -179,54 +269,74 @@ export class CorteCajaComponent implements OnInit {
     doc.text('VENTAS TARJETA:', 10, 56);
     doc.text(`$${corte.totalTarjeta.toFixed(2)}`, 70, 56, { align: 'right' });
 
-    doc.text('PROPINAS REGISTRADAS:', 10, 62);
-    doc.text(`$${corte.totalPropinas.toFixed(2)}`, 70, 62, { align: 'right' });
+    doc.text('VENTAS TRANSFERENCIA:', 10, 62);
+    doc.text(`$${(corte.totalTransferencias || 0).toFixed(2)}`, 70, 62, {
+      align: 'right',
+    });
 
-    doc.text('RETIROS / GASTOS:', 10, 68);
-    doc.text(`-$${(corte.gastos || 0).toFixed(2)}`, 70, 68, { align: 'right' });
+    doc.text('PROPINAS REGISTRADAS:', 10, 68);
+    doc.text(`$${corte.totalPropinas.toFixed(2)}`, 70, 68, { align: 'right' });
+
+    doc.text('RETIROS / GASTOS:', 10, 74);
+    doc.text(`-$${(corte.gastos || 0).toFixed(2)}`, 70, 74, { align: 'right' });
+
+    // Usamos una variable dinámica para no encimar los textos
+    let currentY = 80;
+
     if (corte.detalleGastos) {
       doc.setFontSize(8);
       doc.setFont('helvetica', 'italic');
-      // Imprime el motivo justo debajo del monto del gasto
-      doc.text(`Motivo: ${corte.detalleGastos}`, 10, 72);
+      // Imprime el motivo dinámicamente
+      doc.text(`Motivo: ${corte.detalleGastos}`, 10, currentY);
       doc.setFontSize(9);
       doc.setFont('helvetica', 'normal');
+      currentY += 6; // Empuja la siguiente línea hacia abajo
     }
-    doc.text('--------------------------------------------------', 40, 74, {
-      align: 'center',
-    });
 
-    doc.text('--------------------------------------------------', 40, 68, {
-      align: 'center',
-    });
+    doc.text(
+      '--------------------------------------------------',
+      40,
+      currentY,
+      { align: 'center' },
+    );
+    currentY += 6;
 
     // --- TOTALES ---
     doc.setFont('helvetica', 'bold');
-    doc.text('GRAN TOTAL DEL TURNO:', 10, 76);
-    doc.text(`$${corte.granTotal.toFixed(2)}`, 70, 76, { align: 'right' });
-
-    doc.setFont('helvetica', 'normal');
-    doc.text('--------------------------------------------------', 40, 84, {
-      align: 'center',
+    doc.text('GRAN TOTAL DEL TURNO:', 10, currentY);
+    doc.text(`$${corte.granTotal.toFixed(2)}`, 70, currentY, {
+      align: 'right',
     });
 
-    // --- AUDITORÍA Y FIRMA ---
-    doc.text('FALTANTE / SOBRANTE:', 10, 92);
-    doc.setFont('helvetica', 'bold');
+    currentY += 6;
+    doc.setFont('helvetica', 'normal');
+    doc.text(
+      '--------------------------------------------------',
+      40,
+      currentY,
+      { align: 'center' },
+    );
 
-    // Formateamos el símbolo dependiendo si faltó o sobró dinero
+    currentY += 8;
+    // --- AUDITORÍA Y FIRMA ---
+    doc.text('FALTANTE / SOBRANTE:', 10, currentY);
+
+    currentY += 6;
+    doc.setFont('helvetica', 'bold');
     const textoDiferencia =
       corte.diferencia > 0
         ? `+$${corte.diferencia.toFixed(2)}`
         : `-$${Math.abs(corte.diferencia).toFixed(2)}`;
+    doc.text(textoDiferencia, 70, currentY, { align: 'right' });
 
-    doc.text(textoDiferencia, 70, 98, { align: 'right' });
-
+    currentY += 20;
     // Espacio para la firma física
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(8);
-    doc.text('_______________________', 40, 125, { align: 'center' });
-    doc.text('Firma del Cajero', 40, 130, { align: 'center' });
+    doc.text('_______________________', 40, currentY, { align: 'center' });
+
+    currentY += 5;
+    doc.text('Firma del Cajero', 40, currentY, { align: 'center' });
 
     // --- ABRIR Y MANDAR A IMPRIMIR AUTOMÁTICAMENTE ---
     doc.autoPrint();

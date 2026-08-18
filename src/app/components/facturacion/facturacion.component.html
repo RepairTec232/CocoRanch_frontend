@@ -3,96 +3,184 @@
     <i class="bi bi-file-earmark-text text-warning fs-1 me-3"></i>
     <div>
       <h2 class="mb-0 fw-bold">Módulo de Facturación</h2>
-      <p class="text-muted mb-0">Gestión de clientes y comprobantes fiscales de CocoRanch</p>
+      <p class="text-muted mb-0">
+        Gestión de clientes y comprobantes fiscales de CocoRanch
+      </p>
     </div>
   </div>
 
   <div class="row g-4">
-    
     <div class="col-md-7">
       <div class="card shadow-sm border-0 h-100">
         <div class="card-header bg-dark text-white p-3">
-          <h5 class="mb-0"><i class="bi bi-person-vcard me-2"></i> Datos Fiscales del Cliente</h5>
+          <h5 class="mb-0">
+            <i class="bi bi-person-vcard me-2"></i> Datos Fiscales del Cliente
+          </h5>
         </div>
 
         <div class="card-body p-4">
           <div class="position-relative mb-4">
-            <label class="form-label text-muted fw-bold small text-uppercase">Buscador en Tiempo Real</label>
+            <label class="form-label text-muted fw-bold small text-uppercase"
+              >Buscador en Tiempo Real</label
+            >
             <div class="input-group input-group-lg">
-              <span class="input-group-text bg-light"><i class="bi bi-search text-warning"></i></span>
-              <input type="text" class="form-control" 
-                     placeholder="Escribe el Nombre, RFC o Teléfono para buscar..." 
-                     [(ngModel)]="terminoBusqueda" 
-                     (input)="buscarCliente()"> </div>
-            
-            <ul class="list-group position-absolute w-100 shadow mt-1" style="z-index: 1000;" *ngIf="clientesEncontrados.length > 0">
-              <li class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" 
-                  *ngFor="let c of clientesEncontrados" (click)="seleccionarCliente(c)" style="cursor: pointer;">
+              <span class="input-group-text bg-light"
+                ><i class="bi bi-search text-warning"></i
+              ></span>
+              <input
+                type="text"
+                class="form-control"
+                placeholder="Escribe el Nombre, RFC o Teléfono para buscar..."
+                [(ngModel)]="terminoBusqueda"
+                (input)="buscarCliente()"
+              />
+            </div>
+
+            <ul
+              class="list-group position-absolute w-100 shadow mt-1"
+              style="z-index: 1000"
+              *ngIf="clientesEncontrados.length > 0"
+            >
+              <li
+                class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+                *ngFor="let c of clientesEncontrados"
+                (click)="seleccionarCliente(c)"
+                style="cursor: pointer"
+              >
                 <div>
-                  <strong class="text-dark">{{ c.razonSocial }}</strong><br>
-                  <small class="text-muted">RFC: {{ c.rfc }} | WhatsApp: {{ c.telefono || 'N/A' }}</small>
+                  <strong class="text-dark">{{ c.razonSocial }}</strong
+                  ><br />
+                  <small class="text-muted"
+                    >RFC: {{ c.rfc }} | WhatsApp:
+                    {{ c.telefono || "N/A" }}</small
+                  >
                 </div>
-                <span class="badge bg-warning text-dark">Seleccionar <i class="bi bi-chevron-right"></i></span>
+                <span class="badge bg-warning text-dark"
+                  >Seleccionar <i class="bi bi-chevron-right"></i
+                ></span>
               </li>
             </ul>
           </div>
 
-          <hr class="mb-4">
+          <hr class="mb-4" />
 
           <div class="d-flex justify-content-between align-items-center mb-3">
             <h6 class="text-warning fw-bold mb-0">
-              <i class="bi bi-pencil-square"></i> 
-              {{ clienteActual.id ? 'Modificar Cliente Existente (ID: #' + clienteActual.id + ')' : 'Capturar Nuevos Datos Fiscales' }}
+              <i class="bi bi-pencil-square"></i>
+              {{
+                clienteActual.id
+                  ? "Modificar Cliente Existente (ID: #" +
+                    clienteActual.id +
+                    ")"
+                  : "Capturar Nuevos Datos Fiscales"
+              }}
             </h6>
           </div>
-          
+
           <div class="row g-3">
             <div class="col-md-6">
               <label class="form-label fw-bold small">RFC *</label>
-              <input type="text" class="form-control text-uppercase" [(ngModel)]="clienteActual.rfc" placeholder="Ej. XAXX010101000" maxlength="13">
+              <input
+                type="text"
+                class="form-control text-uppercase"
+                [(ngModel)]="clienteActual.rfc"
+                placeholder="Ej. XAXX010101000"
+                maxlength="13"
+              />
             </div>
 
             <div class="col-md-6">
-              <label class="form-label fw-bold small">Código Postal Fiscal *</label>
-              <input type="text" class="form-control" [(ngModel)]="clienteActual.codigoPostal" placeholder="Ej. 80000" maxlength="5">
+              <label class="form-label fw-bold small"
+                >Código Postal Fiscal *</label
+              >
+              <input
+                type="text"
+                class="form-control"
+                [(ngModel)]="clienteActual.codigoPostal"
+                placeholder="Ej. 80000"
+                maxlength="5"
+              />
             </div>
 
             <div class="col-12">
-              <label class="form-label fw-bold small">Razón Social o Nombre Completo *</label>
-              <input type="text" class="form-control text-uppercase" [(ngModel)]="clienteActual.razonSocial" placeholder="Como aparece en la constancia de situación fiscal">
+              <label class="form-label fw-bold small"
+                >Razón Social o Nombre Completo *</label
+              >
+              <input
+                type="text"
+                class="form-control text-uppercase"
+                [(ngModel)]="clienteActual.razonSocial"
+                placeholder="Como aparece en la constancia de situación fiscal"
+              />
             </div>
 
             <div class="col-12">
               <label class="form-label fw-bold small">Régimen Fiscal *</label>
-              <select class="form-select" [(ngModel)]="clienteActual.regimenFiscal">
+              <select
+                class="form-select"
+                [(ngModel)]="clienteActual.regimenFiscal"
+              >
                 <option value="">-- Selecciona el régimen --</option>
-                <option value="601">601 - General de Ley Personas Morales</option>
-                <option value="605">605 - Sueldos y Salarios / Ingresos por Asimilados</option>
-                <option value="612">612 - Personas Físicas con Actividades Empresariales</option>
-                <option value="626">626 - RESICO (Régimen Simplificado de Confianza)</option>
+                <option value="601">
+                  601 - General de Ley Personas Morales
+                </option>
+                <option value="605">
+                  605 - Sueldos y Salarios / Ingresos por Asimilados
+                </option>
+                <option value="612">
+                  612 - Personas Físicas con Actividades Empresariales
+                </option>
+                <option value="626">
+                  626 - RESICO (Régimen Simplificado de Confianza)
+                </option>
               </select>
             </div>
 
             <div class="col-md-6">
-              <label class="form-label fw-bold small">WhatsApp Notificaciones (10 dígitos)</label>
+              <label class="form-label fw-bold small"
+                >WhatsApp Notificaciones (10 dígitos)</label
+              >
               <div class="input-group">
-                <span class="input-group-text bg-success bg-opacity-10 text-success"><i class="bi bi-whatsapp"></i></span>
-                <input type="text" class="form-control" [(ngModel)]="clienteActual.telefono" placeholder="Ej. 6671234567" maxlength="10">
+                <span
+                  class="input-group-text bg-success bg-opacity-10 text-success"
+                  ><i class="bi bi-whatsapp"></i
+                ></span>
+                <input
+                  type="text"
+                  class="form-control"
+                  [(ngModel)]="clienteActual.telefono"
+                  placeholder="Ej. 6671234567"
+                  maxlength="10"
+                />
               </div>
             </div>
 
             <div class="col-md-6">
-              <label class="form-label fw-bold small">Correo Electrónico (Opcional)</label>
-              <input type="email" class="form-control" [(ngModel)]="clienteActual.email" placeholder="cliente@correo.com">
+              <label class="form-label fw-bold small"
+                >Correo Electrónico (Opcional)</label
+              >
+              <input
+                type="email"
+                class="form-control"
+                [(ngModel)]="clienteActual.email"
+                placeholder="cliente@correo.com"
+              />
             </div>
           </div>
 
           <div class="mt-4 d-flex justify-content-between">
-            <button class="btn btn-outline-secondary fw-bold" (click)="limpiarFormulario()" *ngIf="clienteActual.id || clienteActual.rfc">
+            <button
+              class="btn btn-outline-secondary fw-bold"
+              (click)="limpiarFormulario()"
+              *ngIf="clienteActual.id || clienteActual.rfc"
+            >
               <i class="bi bi-eraser-fill"></i> Limpiar Campos
             </button>
             <div class="ms-auto">
-              <button class="btn btn-warning text-dark fw-bold px-4 shadow-sm" (click)="guardarCliente()">
+              <button
+                class="btn btn-warning text-dark fw-bold px-4 shadow-sm"
+                (click)="guardarCliente()"
+              >
                 <i class="bi bi-cloud-arrow-up-fill me-1"></i> Guardar Cliente
               </button>
             </div>
@@ -104,57 +192,117 @@
     <div class="col-md-5">
       <div class="card shadow-sm border-0 h-100">
         <div class="card-header bg-secondary text-white p-3">
-          <h5 class="mb-0"><i class="bi bi-receipt-cutoff me-2"></i> Vincular Pedido Pagado</h5>
+          <h5 class="mb-0">
+            <i class="bi bi-receipt-cutoff me-2"></i> Vincular Pedido Pagado
+          </h5>
         </div>
         <div class="card-body p-4 d-flex flex-column">
-          
-          <label class="form-label fw-bold small text-muted">Ingresa el ID del Ticket</label>
+          <label class="form-label fw-bold small text-muted"
+            >Ingresa el ID del Ticket</label
+          >
           <div class="input-group mb-3">
             <span class="input-group-text bg-light fw-bold">#</span>
-            <input type="number" class="form-control form-control-lg fw-bold text-center border-dark" [(ngModel)]="numeroTicketBuscado" placeholder="Ej. 14">
-            <button class="btn btn-dark fw-bold px-4" (click)="buscarTicket()"><i class="bi bi-search"></i></button>
+            <input
+              type="number"
+              class="form-control form-control-lg fw-bold text-center border-dark"
+              [(ngModel)]="numeroTicketBuscado"
+              placeholder="Ej. 14"
+            />
+            <button class="btn btn-dark fw-bold px-4" (click)="buscarTicket()">
+              <i class="bi bi-search"></i>
+            </button>
           </div>
 
-          <div *ngIf="errorTicket" class="alert alert-danger py-2 small border-0 shadow-sm rounded-3">
-            <i class="bi bi-exclamation-octagon-fill me-1"></i> {{ errorTicket }}
+          <div
+            *ngIf="errorTicket"
+            class="alert alert-danger py-2 small border-0 shadow-sm rounded-3"
+          >
+            <i class="bi bi-exclamation-octagon-fill me-1"></i>
+            {{ errorTicket }}
           </div>
 
-          <div *ngIf="ordenEncontrada" class="card bg-light border-0 mt-2 flex-grow-1 shadow-inner">
+          <div
+            *ngIf="ordenEncontrada"
+            class="card bg-light border-0 mt-2 flex-grow-1 shadow-inner"
+          >
             <div class="card-body">
-              <div class="d-flex justify-content-between border-bottom pb-2 mb-3">
-                <span class="fw-bold text-primary">Orden Activa #{{ ordenEncontrada.id }}</span>
-                <span class="badge bg-dark">Mesa {{ ordenEncontrada.mesa?.numero }}</span>
+              <div
+                class="d-flex justify-content-between border-bottom pb-2 mb-3"
+              >
+                <span class="fw-bold text-primary"
+                  >Orden Activa #{{ ordenEncontrada.id }}</span
+                >
+                <span class="badge bg-dark">
+                  {{
+                    ordenEncontrada.mesa
+                      ? "Mesa " + ordenEncontrada.mesa.numero
+                      : ordenEncontrada.clienteExterno || "Pedido Externo"
+                  }}
+                </span>
+                >
               </div>
-              
-              <ul class="list-group list-group-flush mb-3" style="max-height: 200px; overflow-y: auto;">
-                <li class="list-group-item bg-transparent px-0 py-1 d-flex justify-content-between small" *ngFor="let d of ordenEncontrada.detalles">
+
+              <ul
+                class="list-group list-group-flush mb-3"
+                style="max-height: 200px; overflow-y: auto"
+              >
+                <li
+                  class="list-group-item bg-transparent px-0 py-1 d-flex justify-content-between small"
+                  *ngFor="let d of ordenEncontrada.detalles"
+                >
                   <span>{{ d.cantidad }}x {{ d.producto?.nombre }}</span>
-                  <span class="fw-bold text-muted">${{ d.cantidad * d.precioUnitario | number: '1.2-2' }}</span>
+                  <span class="fw-bold text-muted"
+                    >${{
+                      d.cantidad * d.precioUnitario | number: "1.2-2"
+                    }}</span
+                  >
                 </li>
               </ul>
-              
-              <div class="d-flex justify-content-between align-items-center pt-2 border-top fs-4 fw-bold text-dark">
+
+              <div
+                class="d-flex justify-content-between align-items-center pt-2 border-top fs-4 fw-bold text-dark"
+              >
                 <span>Subtotal:</span>
-                <span class="text-success">${{ ordenEncontrada.subtotal | number: '1.2-2' }}</span>
+                <span class="text-success"
+                  >${{ ordenEncontrada.subtotal | number: "1.2-2" }}</span
+                >
               </div>
             </div>
           </div>
 
           <div class="d-grid gap-2 mt-4">
-            <button class="btn btn-lg btn-success fw-bold shadow-sm py-3" 
-                    [disabled]="!ordenEncontrada || !clienteActual.id || !clienteActual.telefono"
-                    (click)="enviarPorWhatsApp()">
-              <i class="bi bi-whatsapp me-2 fs-5"></i> Enviar Factura por WhatsApp
-            </button>
-            <div class="alert alert-warning py-2 small text-center mb-0 mt-1 border-0" *ngIf="!clienteActual.id || !ordenEncontrada || !clienteActual.telefono">
+            <div class="d-flex gap-2 mt-4">
+              <!-- Botón de WhatsApp Actual -->
+              <button
+                class="btn btn-success fw-bold"
+                (click)="enviarPorWhatsApp()"
+                [disabled]="!ordenEncontrada || !clienteActual.telefono"
+              >
+                <i class="bi bi-whatsapp"></i> Enviar por WhatsApp
+              </button>
+
+              <!-- NUEVO: Botón de Descargar PDF -->
+              <button
+                class="btn btn-danger fw-bold"
+                (click)="generarFacturaPDF()"
+                [disabled]="!ordenEncontrada"
+              >
+                <i class="bi bi-file-earmark-pdf"></i> Descargar PDF Factura
+              </button>
+            </div>
+            <div
+              class="alert alert-warning py-2 small text-center mb-0 mt-1 border-0"
+              *ngIf="
+                !clienteActual.id || !ordenEncontrada || !clienteActual.telefono
+              "
+            >
               <i class="bi bi-info-circle-fill me-1"></i>
-              Para enviar por WhatsApp necesitas: **Guardar al cliente**, que tenga **teléfono** registrado y **vincular un ticket** válido.
+              Para enviar por WhatsApp necesitas: **Guardar al cliente**, que
+              tenga **teléfono** registrado y **vincular un ticket** válido.
             </div>
           </div>
-
         </div>
       </div>
     </div>
-
   </div>
 </div>

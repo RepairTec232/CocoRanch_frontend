@@ -69,6 +69,7 @@
               <th class="ps-3">Fecha del Cierre</th>
               <th>Efectivo</th>
               <th>Tarjeta</th>
+              <th>Transferencia</th>
               <th>Propinas</th>
               <th>Comisión (4%)</th>
               <th class="text-end pe-3">Gran Total</th>
@@ -79,6 +80,7 @@
               <td class="ps-3 fw-bold text-secondary">{{ corte.fecha }}</td>
               <td class="text-success fw-semibold">${{ corte.totalEfectivo | number:'1.2-2' }}</td>
               <td class="text-info fw-semibold">${{ corte.totalTarjeta | number:'1.2-2' }}</td>
+              <td class="text-primary fw-semibold">${{ corte.totalTransferencias | number:'1.2-2' }}</td>
               <td class="text-warning fw-semibold">${{ corte.totalPropinas | number:'1.2-2' }}</td>
               <td class="text-danger">${{ corte.totalComisiones | number:'1.2-2' }}</td>
               <td class="text-end pe-3 fw-bold text-primary">${{ corte.granTotal | number:'1.2-2' }}</td>

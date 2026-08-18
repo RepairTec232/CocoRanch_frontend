@@ -16,9 +16,8 @@ export class CajaComponent implements OnInit {
   ordenId!: number;
   ordenActiva: Orden | null = null;
 
-  metodoPago: 'EFECTIVO' | 'TARJETA' = 'EFECTIVO';
+  metodoPago: 'EFECTIVO' | 'TARJETA' | 'TRANSFERENCIA'= 'EFECTIVO';
   propina: number = 0;
-
   porcentajeSeleccionado: number | string = 0;
 
   constructor(
@@ -55,7 +54,7 @@ export class CajaComponent implements OnInit {
     return this.subtotal + propinaLimpia;
   }
 
-  seleccionarMetodo(metodo: 'EFECTIVO' | 'TARJETA'): void {
+  seleccionarMetodo(metodo: 'EFECTIVO' | 'TARJETA' | 'TRANSFERENCIA'): void {
     this.metodoPago = metodo;
   }
 

@@ -7,5 +7,5 @@ export interface PedidoExterno {
   detallePedido: string;
   detalle?: string;
   tipo: 'Para llevar' | 'Para recoger' | 'En espera';
-  estatus: 'Pendiente' | 'Listo' | 'Entregado';
+  estatus: 'Pendiente' | 'Listo' | 'Entregado' | 'Cancelado';
 }

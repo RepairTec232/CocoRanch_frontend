@@ -33,4 +33,8 @@ export class PedidoExternoService {
     // Cambia 'any' por tu modelo Orden
     return this.http.post<any>(`${this.apiUrl}/${id}/cobrar`, {});
   }
+
+  editarPedido(id: number, pedido: PedidoExterno): Observable<PedidoExterno> {
+    return this.http.put<PedidoExterno>(`${this.apiUrl}/${id}`, pedido);
+  }
 }

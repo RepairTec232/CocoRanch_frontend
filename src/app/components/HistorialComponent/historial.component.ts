@@ -45,6 +45,7 @@ export class HistorialComponent implements OnInit {
           alert('¡Corte de caja guardado con éxito en el histórico!');
           this.cargarResumenHoy(); // Se resetea o recalcula
           this.cargarHistorial();  // Actualiza la tabla inferior
+          window.location.reload();
         },
         error: (err) => alert('Error al procesar el cierre: ' + err.message)
       });

@@ -1,11 +1,11 @@
 import { ApplicationConfig } from '@angular/core';
-import { provideRouter } from '@angular/router';
 import { provideHttpClient, withFetch, withInterceptorsFromDi } from '@angular/common/http';
 import { MSAL_INSTANCE, MSAL_GUARD_CONFIG, MsalService, MsalGuard, MsalInterceptor, MsalBroadcastService } from '@azure/msal-angular';
 import { PublicClientApplication, InteractionType, BrowserCacheLocation } from '@azure/msal-browser';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { routes } from './app.routes';
 import { environment } from '../environments/environment';
+import { provideRouter, withHashLocation } from '@angular/router';
 
 const { ActiveDirectory, AppProps } = environment;
 export function MSALInstanceFactory() {
@@ -29,7 +29,7 @@ export function MSALGuardConfigFactory() {
 
 export const appConfig: ApplicationConfig = {
 providers: [
-    provideRouter(routes), 
+    provideRouter(routes, withHashLocation()),
     provideHttpClient(),
     provideHttpClient(withInterceptorsFromDi()),
     provideHttpClient(withFetch()),

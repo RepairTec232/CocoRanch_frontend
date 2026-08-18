@@ -27,6 +27,11 @@ export class MapaMesasComponent implements OnInit {
   productoActualId: number | null = null;
   cantidadActual: number = 1;
 
+  mostrarCancelados: boolean = false;
+
+  modoEdicion: boolean = false;
+  pedidoEditandoId: number | null = null;
+
   constructor(
     private service: RestauranteService,
     private router: Router,
@@ -61,6 +66,20 @@ export class MapaMesasComponent implements OnInit {
     });
   }
 
+  get pedidosFiltrados(): PedidoExterno[] {
+    if (this.mostrarCancelados) {
+      // Muestra ÚNICAMENTE los pedidos cancelados
+      return this.pedidosExternos.filter((p) => p.estatus === 'Cancelado');
+    }
+    // Vista por defecto: Muestra pedidos activos (Pendiente, Listo, Entregado) y oculta los cancelados
+    return this.pedidosExternos.filter((p) => p.estatus !== 'Cancelado');
+  }
+
+  // Método para alternar la vista
+  toggleCancelados(): void {
+    this.mostrarCancelados = !this.mostrarCancelados;
+  }
+
   seleccionarMesa(mesa: Mesa) {
     if (mesa.estado === 'LIBRE') {
       if (confirm(`¿Desea abrir la Mesa ${mesa.numero}?`)) {
@@ -77,10 +96,45 @@ export class MapaMesasComponent implements OnInit {
 
   abrirNuevoPedido(): void {
     this.mostrarFormulario = true;
+    this.modoEdicion = false;
+    this.pedidoEditandoId = null;
     this.nuevoPedido = this.inicializarPedido();
-    this.platillosSeleccionados = []; // <--- LIMPIA EL CARRITO
+    this.platillosSeleccionados = [];
     this.productoActualId = null;
     this.cantidadActual = 1;
+  }
+
+  abrirEditarPedido(pedido: PedidoExterno): void {
+    this.modoEdicion = true;
+    this.pedidoEditandoId = pedido.id || null;
+    this.nuevoPedido = { ...pedido }; // Hacemos una copia para no alterar la tabla
+    this.platillosSeleccionados = [];
+    this.productoActualId = null;
+    this.cantidadActual = 1;
+
+    // Reconstruir el carrito leyendo la propiedad 'pedido' ("ID,CANTIDAD,PRECIO|...")
+    if (pedido.pedido) {
+      const items = pedido.pedido.split('|');
+      items.forEach((item) => {
+        const partes = item.split(',');
+        if (partes.length >= 2) {
+          const prodId = Number(partes[0]);
+          const cantidad = Number(partes[1]);
+          // Buscamos el producto en el men  cargado
+          const productoOriginal = this.menuProductos.find(
+            (mp) => mp.id === prodId,
+          );
+          if (productoOriginal) {
+            this.platillosSeleccionados.push({
+              producto: productoOriginal,
+              cantidad: cantidad,
+            });
+          }
+        }
+      });
+    }
+
+    this.mostrarFormulario = true;
   }
 
   agregarPlatillo(): void {
@@ -130,21 +184,40 @@ export class MapaMesasComponent implements OnInit {
       .map((item) => `${item.cantidad}x ${item.producto.nombre}`)
       .join(', ');
 
-    // 4. ENVIAMOS AL BACKEND
-    this.pedidoExternoService.crearPedido(this.nuevoPedido).subscribe({
-      next: (pedidoGuardado) => {
-        // Truco visual para la tabla
-
-        this.pedidosExternos.unshift(pedidoGuardado);
-        this.mostrarFormulario = false;
-      },
-      error: (err) => {
-        alert('Error al guardar el pedido en base de datos');
-        console.error(err);
-      },
-    });
+    // 4. ENVIAMOS AL BACKEND DEPENDIENDO DEL MODO
+    if (this.modoEdicion && this.pedidoEditandoId) {
+      this.pedidoExternoService
+        .editarPedido(this.pedidoEditandoId, this.nuevoPedido)
+        .subscribe({
+          next: (pedidoActualizado) => {
+            // Actualizamos visualmente la tabla
+            const index = this.pedidosExternos.findIndex(
+              (p) => p.id === this.pedidoEditandoId,
+            );
+            if (index !== -1) {
+              this.pedidosExternos[index] = pedidoActualizado;
+            }
+            this.mostrarFormulario = false;
+          },
+          error: (err) => {
+            alert('Error al actualizar el pedido en base de datos');
+            console.error(err);
+          },
+        });
+    } else {
+      this.pedidoExternoService.crearPedido(this.nuevoPedido).subscribe({
+        next: (pedidoGuardado) => {
+          this.pedidosExternos.unshift(pedidoGuardado);
+          this.mostrarFormulario = false;
+        },
+        error: (err) => {
+          alert('Error al guardar el pedido en base de datos');
+          console.error(err);
+        },
+      });
+    }
   }
-
+  
   private inicializarPedido(): PedidoExterno {
     return {
       fecha: new Date(),
@@ -206,6 +279,36 @@ export class MapaMesasComponent implements OnInit {
           },
         });
       }
+    }
+  }
+
+  cancelarPedido(pedido: PedidoExterno): void {
+    if (
+      confirm(
+        `¿Estás seguro de que deseas cancelar el pedido de ${pedido.cliente}? Esto no generará cobro.`,
+      )
+    ) {
+      // Validamos que el pedido tenga un ID válido antes de enviarlo
+      if (!pedido.id) return;
+
+      // Descomentamos y usamos el servicio HTTP
+      this.service.cancelarPedido(pedido.id).subscribe({
+        next: (pedidoActualizado) => {
+          // Si el backend responde OK, actualizamos la vista
+          pedido.estatus = 'Cancelado';
+
+          // Opcional: Si quieres que desaparezca de la pantalla del cajero
+          // this.pedidosExternos = this.pedidosExternos.filter(p => p.id !== pedido.id);
+
+          alert('El pedido ha sido cancelado exitosamente.');
+        },
+        error: (err) => {
+          console.error('Error en el servidor:', err);
+          alert(
+            'Hubo un problema de conexión local al intentar cancelar el pedido.',
+          );
+        },
+      });
     }
   }
 }

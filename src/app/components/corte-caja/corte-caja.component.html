@@ -29,25 +29,58 @@
                 <label class="form-label fw-bold text-danger"
                   >Gastos / Retiros (Efectivo)</label
                 >
-                <div class="input-group">
+
+                <ul
+                  class="list-group mb-2 shadow-sm"
+                  *ngIf="gastosDelTurno.length > 0"
+                >
+                  <li
+                    class="list-group-item d-flex justify-content-between align-items-center py-1 bg-light border-danger"
+                    *ngFor="let g of gastosDelTurno"
+                  >
+                    <small class="text-muted">{{ g.descripcion }}</small>
+                    <div>
+                      <span class="fw-bold text-danger me-2"
+                        >-${{ g.monto | number: "1.2-2" }}</span
+                      >
+                      <button
+                        class="btn btn-sm text-danger border-0 p-0"
+                        (click)="eliminarGasto(g.id)"
+                        title="Eliminar gasto"
+                      >
+                        <i class="bi bi-trash-fill"></i>
+                      </button>
+                    </div>
+                  </li>
+                </ul>
+
+                <div class="input-group mb-1">
+                  <input
+                    type="text"
+                    class="form-control border-danger"
+                    [(ngModel)]="nuevoGasto.descripcion"
+                    placeholder="Descripción (Ej. Hielo)"
+                  />
                   <span class="input-group-text bg-danger text-white">$</span>
                   <input
                     type="number"
                     class="form-control border-danger"
-                    [(ngModel)]="gastosGenerales"
+                    [(ngModel)]="nuevoGasto.monto"
                     placeholder="0.00"
+                    style="max-width: 90px"
                   />
-                  <input
-                    type="text"
-                    class="form-control form-control-sm border-danger"
-                    [(ngModel)]="detalleGastos"
-                    placeholder="Ej. Garrafón de agua, Hielo..."
-                    [disabled]="gastosGenerales <= 0"
-                  />
+                  <button
+                    class="btn btn-danger fw-bold"
+                    (click)="registrarGasto()"
+                  >
+                    <i class="bi bi-plus-circle"></i>
+                  </button>
                 </div>
-
-                <small class="text-muted"
-                  >Efectivo tomado para compras del día.</small
+                <small class="text-muted d-block text-end"
+                  >Total Gastos:
+                  <strong class="text-danger"
+                    >${{ gastosGenerales | number: "1.2-2" }}</strong
+                  ></small
                 >
               </div>
 
@@ -81,6 +114,10 @@
                 <li class="list-group-item d-flex justify-content-between px-0">
                   <span>Ventas con Tarjeta:</span>
                   <strong>${{ ventasTarjeta | number: "1.2-2" }}</strong>
+                </li>
+                <li class="list-group-item d-flex justify-content-between px-0">
+                  <span>Ventas con Transferencia:</span>
+                  <strong>${{ ventasTransferencia | number: "1.2-2" }}</strong>
                 </li>
                 <li
                   class="list-group-item d-flex justify-content-between px-0 text-success"
@@ -183,7 +220,12 @@
             <tr *ngFor="let item of pedidosDelDia">
               <td class="fw-bold text-muted">#{{ item.id }}</td>
               <td>
-                <span class="badge bg-dark">Mesa {{ item.mesaNumero }}</span>
+                <span class="badge bg-dark">{{
+                  item.origenPedido ||
+                    (item.mesaNumero !== "N/A"
+                      ? "Mesa " + item.mesaNumero
+                      : "Pedido Externo")
+                }}</span>
               </td>
               <td class="small">
                 <i class="bi bi-calendar-event text-muted"></i> {{ item.fecha }}
@@ -220,12 +262,67 @@
   <div class="row justify-content-center mt-5">
     <div class="col-md-10">
       <div class="card shadow-sm border-0">
-        <div class="card-header bg-secondary text-white p-3">
+        <div
+          class="card-header bg-secondary text-white p-3 d-flex justify-content-between align-items-center"
+        >
           <h5 class="mb-0">
             <i class="bi bi-clock-history me-2"></i> Historial de Cortes
             Archivados
           </h5>
+
+          <!-- NUEVO: Botones de filtrado dinámico -->
+          <div class="btn-group btn-group-sm shadow-sm" role="group">
+            <button
+              type="button"
+              class="btn fw-bold"
+              [ngClass]="
+                filtroActivo === 'HOY'
+                  ? 'btn-light text-dark'
+                  : 'btn-outline-light'
+              "
+              (click)="setFiltro('HOY')"
+            >
+              Hoy
+            </button>
+            <button
+              type="button"
+              class="btn fw-bold"
+              [ngClass]="
+                filtroActivo === 'SEMANA'
+                  ? 'btn-light text-dark'
+                  : 'btn-outline-light'
+              "
+              (click)="setFiltro('SEMANA')"
+            >
+              Últimos 7 Días
+            </button>
+            <button
+              type="button"
+              class="btn fw-bold"
+              [ngClass]="
+                filtroActivo === 'MES'
+                  ? 'btn-light text-dark'
+                  : 'btn-outline-light'
+              "
+              (click)="setFiltro('MES')"
+            >
+              Este Mes
+            </button>
+            <button
+              type="button"
+              class="btn fw-bold"
+              [ngClass]="
+                filtroActivo === 'TODOS'
+                  ? 'btn-light text-dark'
+                  : 'btn-outline-light'
+              "
+              (click)="setFiltro('TODOS')"
+            >
+              Todos
+            </button>
+          </div>
         </div>
+
         <div class="card-body p-0">
           <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
@@ -234,6 +331,7 @@
                   <th class="ps-3">ID / Fecha</th>
                   <th>Efectivo</th>
                   <th>Tarjeta</th>
+                  <th>Transferencia</th>
                   <th>Propinas</th>
                   <th>Gastos</th>
                   <th>Faltante/Sobrante</th>
@@ -242,9 +340,7 @@
                 </tr>
               </thead>
               <tbody>
-                <ng-container
-                  *ngFor="let corte of historialCortes.slice().reverse()"
-                >
+                <ng-container *ngFor="let corte of historialFiltrado">
                   <tr>
                     <td class="ps-3 fw-bold">
                       #{{ corte.id }} <br /><small class="text-muted">{{
@@ -256,6 +352,9 @@
                     </td>
                     <td class="text-info">
                       ${{ corte.totalTarjeta | number: "1.2-2" }}
+                    </td>
+                    <td class="text-primary">
+                      ${{ corte.totalTransferencias | number: "1.2-2" }}
                     </td>
                     <td class="text-warning">
                       ${{ corte.totalPropinas | number: "1.2-2" }}
@@ -330,7 +429,10 @@
                             </tr>
                             <tr *ngFor="let item of articulosVendidos">
                               <td class="fw-bold text-muted">
-                                Orden {{ item.pedidoId }}
+                                Orden {{ item.pedidoId }} <br />
+                                <small class="badge bg-secondary mt-1">{{
+                                  item.origenPedido || "Externo"
+                                }}</small>
                               </td>
 
                               <td>
@@ -363,15 +465,84 @@
                   </tr>
                 </ng-container>
 
-                <tr *ngIf="historialCortes.length === 0">
-                  <td colspan="7" class="text-center py-4 text-muted">
-                    Aún no hay cortes de caja registrados en el sistema.
+                <tr *ngIf="historialFiltrado.length === 0">
+                  <td colspan="8" class="text-center py-4 text-muted">
+                    <i class="bi bi-inbox fs-3 d-block mb-2"></i>
+                    No se encontraron cortes de caja en este periodo de tiempo.
                   </td>
                 </tr>
               </tbody>
             </table>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECCIÓN DE AUDITORÍA (SOLO VISIBLE SI HAY DATOS ELIMINADOS) -->
+  <div
+    class="card border-0 bg-light shadow-sm rounded-3 mb-4 mt-5"
+    *ngIf="
+      auditoria.gastosEliminados.length > 0 ||
+      auditoria.ventasCanceladas.length > 0
+    "
+  >
+    <div
+      class="card-header bg-dark text-white fw-bold d-flex align-items-center"
+    >
+      <i class="bi bi-shield-lock-fill me-2 text-warning fs-5"></i> Auditoría:
+      Registros Eliminados y Cancelados
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive" style="max-height: 300px; overflow-y: auto">
+        <table class="table table-hover table-striped align-middle mb-0">
+          <thead class="table-dark small text-uppercase opacity-75">
+            <tr>
+              <th>Tipo de Registro</th>
+              <th>Detalle / Mesa</th>
+              <th>Monto</th>
+              <th>Fecha de Cancelación</th>
+              <th>Estatus</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Ventas Canceladas -->
+            <tr
+              *ngFor="let v of auditoria.ventasCanceladas"
+              class="table-warning"
+            >
+              <td class="fw-bold text-dark">
+                <i class="bi bi-receipt me-1"></i> Venta Cancelada (Orden #{{
+                  v.id
+                }})
+              </td>
+              <td>
+                Mesa {{ v.mesa?.numero || "N/A" }} <br /><small
+                  class="text-muted"
+                  >{{ v.clienteExterno || "Sin cliente" }}</small
+                >
+              </td>
+              <td class="fw-bold">${{ v.subtotal | number: "1.2-2" }}</td>
+              <td class="small">{{ v.fechaCierre | date: "short" }}</td>
+              <td><span class="badge bg-danger">Cancelada</span></td>
+            </tr>
+            <!-- Gastos Eliminados -->
+            <tr
+              *ngFor="let g of auditoria.gastosEliminados"
+              class="table-danger"
+            >
+              <td class="fw-bold text-dark">
+                <i class="bi bi-cash-coin me-1"></i> Gasto Eliminado (ID #{{
+                  g.id
+                }})
+              </td>
+              <td>{{ g.descripcion }}</td>
+              <td class="fw-bold">${{ g.monto | number: "1.2-2" }}</td>
+              <td class="small">{{ g.fechaEliminacion | date: "short" }}</td>
+              <td><span class="badge bg-dark">Eliminado</span></td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>

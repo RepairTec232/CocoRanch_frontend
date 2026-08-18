@@ -131,4 +131,8 @@ export class RestauranteService {
   cambiarMesa(ordenId: number, nuevaMesaId: number): Observable<any> {
     return this.http.put<any>(`${this.apiURL}/ordenes/${ordenId}/cambiar-mesa/${nuevaMesaId}`, {});
   }
+
+  cancelarPedido(id: number): Observable<any> {
+    return this.http.put(`${this.apiURL}/pedidos-externos/${id}/cancelar`, {});
+  }
 }
