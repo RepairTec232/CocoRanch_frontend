@@ -73,7 +73,12 @@
           >
             <td>{{ p.fecha | date: "short" }}</td>
             <td>
-              <strong>{{ p.cliente }}</strong>
+              <strong>{{ p.cliente }}</strong
+              ><br />
+              <small class="text-muted" *ngIf="p.clienteAsociado?.domicilio">
+                <i class="bi bi-geo-alt-fill text-danger"></i>
+                {{ p.clienteAsociado.domicilio }}
+              </small>
             </td>
             <td>{{ p.telefono || "N/A" }}</td>
             <td class="text-wrap">
@@ -122,7 +127,6 @@
                 </button>
                 <button
                   class="btn btn-sm btn-danger fw-bold"
-                  *ngIf="p.estatus !== 'Entregado'"
                   (click)="cancelarPedido(p)"
                 >
                   <i class="bi bi-x-circle"></i> Cancelar
@@ -146,69 +150,271 @@
   </div>
 
   <!-- MODAL PARA NUEVO PEDIDO -->
+  <!-- MODAL PARA NUEVO PEDIDO Y CLIENTES -->
   <div class="modal-overlay" *ngIf="mostrarFormulario">
     <div class="modal-content p-4 rounded shadow">
-      <h3 class="mb-3">
+      <h4 class="mb-4 text-dark fw-bold">
+        <i
+          class="bi"
+          [ngClass]="modoEdicion ? 'bi-pencil-square' : 'bi-plus-circle-fill'"
+        ></i>
         {{ modoEdicion ? "Editar Pedido Externo" : "Nuevo Pedido Externo" }}
-      </h3>
-      <!-- Fila 1: Cliente y Teléfono -->
-      <div class="row">
-        <div class="col-md-7 mb-3">
-          <label class="form-label fw-bold">Nombre a registrar:</label>
+      </h4>
+
+      <!-- 1. SECCIÓN CLIENTES (Buscador y Formulario) -->
+      <div class="mb-4 position-relative">
+        <label class="form-label fw-bold text-primary"
+          ><i class="bi bi-person-lines-fill me-1"></i> 1. Asignar
+          Cliente:</label
+        >
+
+        <!-- Buscador -->
+        <div
+          class="input-group shadow-sm"
+          *ngIf="!clienteSeleccionado && !mostrarFormCliente"
+        >
+          <span class="input-group-text bg-white border-end-0"
+            ><i class="bi bi-search text-muted"></i
+          ></span>
           <input
             type="text"
-            class="form-control"
-            [(ngModel)]="nuevoPedido.cliente"
-            placeholder="Ej. Juan Pérez"
+            class="form-control border-start-0"
+            placeholder="Buscar por nombre o teléfono..."
+            [(ngModel)]="terminoBusquedaCliente"
+            (input)="buscarCliente()"
           />
+          <button
+            class="btn btn-primary fw-bold"
+            (click)="prepararNuevoCliente()"
+          >
+            <i class="bi bi-person-plus-fill me-1"></i> Nuevo
+          </button>
         </div>
-        <div class="col-md-5 mb-3">
-          <label class="form-label fw-bold">Teléfono:</label>
-          <input
-            type="tel"
-            class="form-control"
-            [(ngModel)]="nuevoPedido.telefono"
-            placeholder="Opcional"
-          />
+
+        <!-- Dropdown de Sugerencias -->
+        <ul
+          class="list-group position-absolute w-100 shadow mt-1"
+          style="z-index: 1050"
+          *ngIf="clientesSugeridos.length > 0"
+        >
+          <li
+            class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-2"
+            *ngFor="let c of clientesSugeridos"
+            (click)="seleccionarCliente(c)"
+            style="cursor: pointer"
+          >
+            <div>
+              <strong class="text-dark"
+                >{{ c.nombre }} {{ c.apellido || "" }}</strong
+              ><br />
+              <small class="text-muted"
+                ><i class="bi bi-telephone"></i> {{ c.telefono }}</small
+              >
+            </div>
+            <span class="badge bg-primary rounded-pill">Seleccionar</span>
+          </li>
+        </ul>
+
+        <!-- Tarjeta del Cliente Seleccionado (Modo Lectura) -->
+        <div
+          class="card bg-light border-primary shadow-sm mt-2"
+          *ngIf="clienteSeleccionado && !mostrarFormCliente"
+        >
+          <div
+            class="card-body d-flex justify-content-between align-items-start py-2 px-3"
+          >
+            <div>
+              <h6 class="fw-bold text-dark mb-1">
+                <i class="bi bi-person-check-fill text-success me-1"></i>
+                {{ clienteSeleccionado.nombre }}
+                {{ clienteSeleccionado.apellido || "" }}
+              </h6>
+              <div class="small text-muted mb-1">
+                <i class="bi bi-telephone-fill me-1"></i>
+                {{ clienteSeleccionado.telefono }}
+              </div>
+              <div
+                class="small text-muted mb-1"
+                *ngIf="clienteSeleccionado.domicilio"
+              >
+                <i class="bi bi-house-door-fill me-1"></i>
+                {{ clienteSeleccionado.domicilio }}
+                <span *ngIf="clienteSeleccionado.referenciaDomicilio"
+                  >({{ clienteSeleccionado.referenciaDomicilio }})</span
+                >
+              </div>
+              <div
+                class="small text-danger fw-bold"
+                *ngIf="clienteSeleccionado.alergias"
+              >
+                <i class="bi bi-exclamation-triangle-fill me-1"></i> Alergias:
+                {{ clienteSeleccionado.alergias }}
+              </div>
+            </div>
+            <div class="btn-group shadow-sm">
+              <button
+                class="btn btn-sm btn-outline-secondary bg-white"
+                (click)="editarClienteActivo()"
+                title="Editar Cliente"
+              >
+                <i class="bi bi-pencil-fill"></i>
+              </button>
+              <button
+                class="btn btn-sm btn-outline-danger bg-white"
+                (click)="eliminarClienteActivo()"
+                title="Eliminar Base de Datos"
+              >
+                <i class="bi bi-trash-fill"></i>
+              </button>
+              <button
+                class="btn btn-sm btn-secondary"
+                (click)="clienteSeleccionado = null"
+                title="Cambiar Cliente"
+              >
+                <i class="bi bi-x"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Formulario (Alta / Edición) -->
+        <!-- Formulario (Alta / Edición de Cliente) -->
+        <div
+          class="card bg-white border-secondary shadow-sm mt-2"
+          *ngIf="mostrarFormCliente"
+        >
+          <div class="card-header bg-light py-2">
+            <h6 class="fw-bold mb-0 text-primary">
+              {{
+                clienteForm.id ? "Editar Cliente" : "Registrar Nuevo Cliente"
+              }}
+            </h6>
+          </div>
+          <div class="card-body p-3">
+            <div class="row g-2">
+              <div class="col-md-6">
+                <label class="small fw-bold text-muted">Nombre *</label>
+                <input
+                  type="text"
+                  class="form-control form-control-sm"
+                  [(ngModel)]="clienteForm.nombre"
+                  placeholder="Ej. Cristian"
+                />
+              </div>
+              <div class="col-md-6">
+                <label class="small fw-bold text-muted"
+                  >Apellido (Opcional)</label
+                >
+                <input
+                  type="text"
+                  class="form-control form-control-sm"
+                  [(ngModel)]="clienteForm.apellido"
+                  placeholder="Ej. Camacho"
+                />
+              </div>
+              <div class="col-md-6">
+                <label class="small fw-bold text-muted">Teléfono *</label>
+                <input
+                  type="tel"
+                  class="form-control form-control-sm"
+                  [(ngModel)]="clienteForm.telefono"
+                  placeholder="Ej. 6671234567"
+                />
+              </div>
+              <div class="col-md-6">
+                <label class="small fw-bold text-danger"
+                  >Alergias / Notas (Opcional)</label
+                >
+                <input
+                  type="text"
+                  class="form-control form-control-sm border-danger"
+                  [(ngModel)]="clienteForm.alergias"
+                  placeholder="Ej. Camarón crudo"
+                />
+              </div>
+
+              <!-- CAMPOS DE DOMICILIO: SOLO VISIBLES SI ES PARA LLEVAR / A DOMICILIO -->
+              <ng-container *ngIf="nuevoPedido.tipo === 'Para llevar'">
+                <div class="col-md-12">
+                  <label class="small fw-bold text-primary"
+                    ><i class="bi bi-geo-alt-fill me-1"></i> Domicilio de
+                    Entrega *</label
+                  >
+                  <input
+                    type="text"
+                    class="form-control form-control-sm"
+                    [(ngModel)]="clienteForm.domicilio"
+                    placeholder="Calle, Colonia y Número"
+                  />
+                </div>
+                <div class="col-md-12">
+                  <label class="small fw-bold text-muted"
+                    >Referencias del Domicilio</label
+                  >
+                  <input
+                    type="text"
+                    class="form-control form-control-sm"
+                    [(ngModel)]="clienteForm.referenciaDomicilio"
+                    placeholder="Ej. Portón negro, taller al lado"
+                  />
+                </div>
+              </ng-container>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2 mt-3">
+              <button
+                class="btn btn-sm btn-outline-secondary"
+                (click)="
+                  mostrarFormCliente = false;
+                  clienteSeleccionado ? null : (clienteForm = {})
+                "
+              >
+                Cancelar
+              </button>
+              <button
+                class="btn btn-sm btn-primary fw-bold"
+                (click)="guardarClienteBD()"
+              >
+                <i class="bi bi-save-fill me-1"></i> Guardar Cliente
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Fila 2: Tipo de Pedido -->
-      <div class="mb-3">
-        <label class="form-label fw-bold">Tipo de Pedido:</label>
-        <select class="form-select" [(ngModel)]="nuevoPedido.tipo">
+      <!-- 2. Tipo de Pedido -->
+      <div class="mb-4">
+        <label class="form-label fw-bold text-primary"
+          ><i class="bi bi-bag-check-fill me-1"></i> 2. Tipo de Pedido:</label
+        >
+        <select class="form-select shadow-sm" [(ngModel)]="nuevoPedido.tipo">
           <option value="Para llevar">Para llevar</option>
           <option value="Para recoger">Para recoger</option>
           <option value="En espera">En espera</option>
         </select>
       </div>
 
-      <div class="card p-3 mb-3 border-secondary">
-        <label class="form-label fw-bold text-primary"
-          >Platillos / Bebidas del Menú:</label
+      <!-- 3. Menú -->
+      <div class="card p-3 mb-4 border-secondary shadow-sm">
+        <label class="form-label fw-bold text-primary mb-2"
+          ><i class="bi bi-card-list me-1"></i> 3. Platillos / Bebidas:</label
         >
-
         <div class="d-flex gap-2 mb-3">
-          <!-- Seleccionador del Menú -->
           <select class="form-select w-75" [(ngModel)]="productoActualId">
             <option [value]="null">Seleccione un producto...</option>
             <option *ngFor="let p of menuProductos" [value]="p.id">
               {{ p.nombre }} - {{ p.precio | currency: "MXN" }}
             </option>
           </select>
-
-          <!-- Cantidad -->
           <input
             type="number"
-            class="form-control w-25"
+            class="form-control w-25 text-center"
             [(ngModel)]="cantidadActual"
             min="1"
             placeholder="Cant."
           />
-
-          <!-- Botón Agregar -->
           <button
-            class="btn btn-outline-primary fw-bold"
+            class="btn btn-primary fw-bold"
             (click)="agregarPlatillo()"
             [disabled]="!productoActualId"
           >
@@ -216,16 +422,18 @@
           </button>
         </div>
 
-        <!-- Lista Visual de Platillos Agregados -->
-        <ul class="list-group list-group-flush mb-0">
+        <ul
+          class="list-group list-group-flush mb-0 border-top pt-2"
+          style="max-height: 150px; overflow-y: auto"
+        >
           <li
             *ngFor="let item of platillosSeleccionados; let i = index"
-            class="list-group-item d-flex justify-content-between align-items-center px-2 py-1"
+            class="list-group-item d-flex justify-content-between align-items-center px-2 py-1 bg-transparent border-0"
           >
             <span>
               <span class="badge bg-secondary me-2">{{ item.cantidad }}x</span>
-              {{ item.producto.nombre }}
-              <small class="text-muted"
+              <span class="fw-bold">{{ item.producto.nombre }}</span>
+              <small class="text-muted ms-1"
                 >({{
                   item.producto.precio * item.cantidad | currency: "MXN"
                 }})</small
@@ -240,20 +448,33 @@
           </li>
           <li
             *ngIf="platillosSeleccionados.length === 0"
-            class="list-group-item px-2 py-1 text-muted fst-italic"
+            class="list-group-item px-2 py-1 text-muted fst-italic bg-transparent border-0"
           >
-            Ningún platillo agregado a la orden.
+            <i class="bi bi-info-circle me-1"></i> Ningún platillo agregado a la
+            orden.
           </li>
         </ul>
       </div>
 
       <!-- Botones Finales del Modal -->
-      <div class="d-flex justify-content-end gap-2 mt-4">
-        <button class="btn btn-secondary" (click)="mostrarFormulario = false">
+      <div class="d-flex justify-content-end gap-2 mt-2 pt-3 border-top">
+        <button
+          class="btn btn-light border fw-bold px-4"
+          (click)="mostrarFormulario = false"
+        >
           Cancelar
         </button>
-        <button class="btn btn-primary fw-bold" (click)="guardarPedido()">
-          {{ modoEdicion ? "Actualizar Orden" : "Guardar Orden" }}
+        <button
+          class="btn btn-success fw-bold px-4 shadow-sm"
+          (click)="guardarPedido()"
+        >
+          <i
+            class="bi"
+            [ngClass]="
+              modoEdicion ? 'bi-check-circle-fill' : 'bi-plus-circle-fill'
+            "
+          ></i>
+          {{ modoEdicion ? "Actualizar Orden" : "Generar Orden" }}
         </button>
       </div>
     </div>

@@ -16,7 +16,11 @@ export class CajaComponent implements OnInit {
   ordenId!: number;
   ordenActiva: Orden | null = null;
 
-  metodoPago: 'EFECTIVO' | 'TARJETA' | 'TRANSFERENCIA'= 'EFECTIVO';
+  metodoPago:
+    | 'EFECTIVO'
+    | 'TARJETA_MERCADO_PAGO'
+    | 'TARJETA_BBVA'
+    | 'TRANSFERENCIA' = 'EFECTIVO';
   propina: number = 0;
   porcentajeSeleccionado: number | string = 0;
 
@@ -43,6 +47,25 @@ export class CajaComponent implements OnInit {
     });
   }
 
+  get nombreCortoCliente(): string {
+    if (this.ordenActiva?.mesa) return 'Mesa ' + this.ordenActiva.mesa.numero;
+    if (this.ordenActiva?.clienteExterno)
+      return this.ordenActiva.clienteExterno.split(' | ')[0];
+    return 'Pedido Externo';
+  }
+
+  get infoExtraCliente(): string {
+    if (
+      this.ordenActiva?.clienteExterno &&
+      this.ordenActiva.clienteExterno.includes(' | ')
+    ) {
+      return this.ordenActiva.clienteExterno.substring(
+        this.ordenActiva.clienteExterno.indexOf(' | ') + 3,
+      );
+    }
+    return '';
+  }
+
   // Cálculos dinámicos reactivos para la interfaz
   get subtotal(): number {
     return this.ordenActiva ? this.ordenActiva.subtotal : 0;
@@ -54,7 +77,7 @@ export class CajaComponent implements OnInit {
     return this.subtotal + propinaLimpia;
   }
 
-  seleccionarMetodo(metodo: 'EFECTIVO' | 'TARJETA' | 'TRANSFERENCIA'): void {
+  seleccionarMetodo(metodo: 'EFECTIVO' | 'TARJETA_MERCADO_PAGO' | 'TARJETA_BBVA' | 'TRANSFERENCIA' ): void {
     this.metodoPago = metodo;
   }
 

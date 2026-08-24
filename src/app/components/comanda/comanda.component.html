@@ -12,14 +12,7 @@
           >
             <i class="bi bi-arrow-left me-1"></i> Regresar
           </button>
-          <h3 class="mb-0">
-            {{
-              ordenActiva.mesa
-                ? "Mesa " + ordenActiva.mesa.numero
-                : ordenActiva.clienteExterno || "Pedido Externo"
-            }}
-            - Menú
-          </h3>
+          <h3 class="mb-0">{{ nombreCortoCliente }} - Menú</h3>
         </div>
 
         <button
@@ -63,15 +56,22 @@
 
           <!-- Muestra el número de mesa si existe, o el cliente externo si es pedido para llevar -->
           <span class="badge bg-warning text-dark fs-6">
-            {{
-              ordenActiva.mesa
-                ? "Mesa " + ordenActiva.mesa.numero
-                : ordenActiva.clienteExterno || "Pedido Externo"
-            }}
+            {{ nombreCortoCliente }}
           </span>
         </div>
 
         <div class="card-body p-0" style="max-height: 400px; overflow-y: auto">
+          <div
+            *ngIf="infoExtraCliente"
+            class="bg-light px-3 py-2 border-bottom border-warning shadow-sm"
+          >
+            <small class="fw-bold text-dark"
+              ><i class="bi bi-truck text-primary me-1"></i> Datos de Entrega /
+              Notas:</small
+            ><br />
+            <small class="text-muted">{{ infoExtraCliente }}</small>
+          </div>
+
           <div
             class="text-center p-4 text-muted"
             *ngIf="ordenActiva.detalles?.length === 0"

@@ -8,4 +8,5 @@ export interface PedidoExterno {
   detalle?: string;
   tipo: 'Para llevar' | 'Para recoger' | 'En espera';
   estatus: 'Pendiente' | 'Listo' | 'Entregado' | 'Cancelado';
+  clienteAsociado?: any;
 }

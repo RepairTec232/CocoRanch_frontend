@@ -1,11 +1,30 @@
 import { ApplicationConfig } from '@angular/core';
-import { provideHttpClient, withFetch, withInterceptorsFromDi } from '@angular/common/http';
-import { MSAL_INSTANCE, MSAL_GUARD_CONFIG, MsalService, MsalGuard, MsalInterceptor, MsalBroadcastService } from '@azure/msal-angular';
-import { PublicClientApplication, InteractionType, BrowserCacheLocation } from '@azure/msal-browser';
+import {
+  provideHttpClient,
+  withFetch,
+  withInterceptorsFromDi,
+} from '@angular/common/http';
+import {
+  MSAL_INSTANCE,
+  MSAL_GUARD_CONFIG,
+  MsalService,
+  MsalGuard,
+  MsalInterceptor,
+  MsalBroadcastService,
+} from '@azure/msal-angular';
+import {
+  PublicClientApplication,
+  InteractionType,
+  BrowserCacheLocation,
+} from '@azure/msal-browser';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { routes } from './app.routes';
 import { environment } from '../environments/environment';
-import { provideRouter, withHashLocation } from '@angular/router';
+import {
+  provideRouter,
+  withHashLocation,
+  withInMemoryScrolling,
+} from '@angular/router';
 
 const { ActiveDirectory, AppProps } = environment;
 export function MSALInstanceFactory() {
@@ -28,13 +47,21 @@ export function MSALGuardConfigFactory() {
 }
 
 export const appConfig: ApplicationConfig = {
-providers: [
-    provideRouter(routes, withHashLocation()),
+  providers: [
+   provideRouter(
+      routes,
+      withHashLocation(),
+      withInMemoryScrolling({
+        scrollPositionRestoration: 'top',
+        anchorScrolling: 'enabled'
+      })
+    ),
     provideHttpClient(),
     provideHttpClient(withInterceptorsFromDi()),
     provideHttpClient(withFetch()),
+
     provideAnimations(),
-        {
+    {
       provide: MSAL_INSTANCE,
       useFactory: MSALInstanceFactory,
     },

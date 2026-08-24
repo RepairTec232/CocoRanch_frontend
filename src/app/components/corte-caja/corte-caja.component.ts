@@ -24,7 +24,8 @@ export class CorteCajaComponent implements OnInit {
 
   // 2. Resumen del Sistema (Datos dinámicos del Backend)
   ventasEfectivo: number = 0;
-  ventasTarjeta: number = 0;
+  ventasMercadoPago: number = 0; // <-- NUEVA VARIABLE
+  ventasBBVA: number = 0;
   ventasTransferencia: number = 0;
   propinas: number = 0;
   comisiones: number = 0;
@@ -93,12 +94,12 @@ export class CorteCajaComponent implements OnInit {
   }
 
   cargarPedidosDelDia(): void {
-    // Cambia la URL si tu endpoint de Spring Boot se llama de otra forma
     this.http
       .get<any[]>('http://localhost:8080/api/caja/pedidos-actuales')
       .subscribe({
         next: (data) => {
-          this.pedidosDelDia = data;
+          // ORDENAMIENTO DE MAYOR A MENOR TICKET (#)
+          this.pedidosDelDia = data.sort((a, b) => Number(b.id) - Number(a.id));
         },
         error: (err) => {
           console.error('Error al cargar pedidos del día:', err);
@@ -156,7 +157,8 @@ export class CorteCajaComponent implements OnInit {
       next: (data) => {
         if (data) {
           this.ventasEfectivo = data.totalEfectivo || 0;
-          this.ventasTarjeta = data.totalTarjeta || 0;
+          this.ventasMercadoPago = data.totalTarjetaMercadoPago || 0;
+          this.ventasBBVA = data.totalTarjetaBBVA || 0;
           this.ventasTransferencia = data.totalTransferencias || 0;
           this.propinas = data.totalPropinas || 0;
           this.comisiones = data.totalComisiones || 0;
@@ -169,6 +171,20 @@ export class CorteCajaComponent implements OnInit {
         );
       },
     });
+  }
+
+  // Limpia las cabeceras largas quitando el Domicilio, Alergias e Identificador [PE-ID]
+  obtenerNombreLimpio(origen: string): string {
+    if (!origen) return 'Pedido Externo';
+    // Si contiene delimitador de domicilio o alergias, tomamos solo la primera parte
+    if (origen.includes(' | ')) {
+      return origen.split(' | ')[0];
+    }
+    // Si contiene el tag [PE-ID], se lo removemos
+    if (origen.includes(' [')) {
+      return origen.split(' [')[0];
+    }
+    return origen;
   }
 
   // Cálculos reactivos para la interfaz
@@ -194,7 +210,8 @@ export class CorteCajaComponent implements OnInit {
     ) {
       const payloadCierre = {
         totalEfectivo: this.ventasEfectivo,
-        totalTarjeta: this.ventasTarjeta,
+        totalTarjetaMercadoPago: this.ventasMercadoPago,
+        totalTarjetaBBVA: this.ventasBBVA,
         totalTransferencias: this.ventasTransferencia,
         totalPropinas: this.propinas,
         totalComisiones: this.comisiones,
@@ -202,7 +219,8 @@ export class CorteCajaComponent implements OnInit {
         detalleGastos: this.detalleGastos,
         granTotal:
           this.ventasEfectivo +
-          this.ventasTarjeta +
+          this.ventasMercadoPago +
+          this.ventasBBVA +
           this.ventasTransferencia +
           this.propinas +
           this.comisiones -
@@ -232,12 +250,18 @@ export class CorteCajaComponent implements OnInit {
   }
 
   imprimirTicket(corte: any): void {
-    // Configuramos el PDF con formato de miniprinter t rnica (80mm de ancho x 150mm de alto)
+    // Configuramos el PDF con formato de miniprinter térmica (80mm de ancho x 170mm de alto)
     const doc = new jsPDF({
       orientation: 'portrait',
       unit: 'mm',
-      format: [80, 160],
+      format: [80, 170],
     });
+
+    // Helper de seguridad para evitar errores de .toFixed() cuando el valor llega null
+    const formatMonto = (valor: any): string => {
+      const num = Number(valor);
+      return isNaN(num) ? '0.00' : num.toFixed(2);
+    };
 
     // --- ENCABEZADO ---
     doc.setFontSize(14);
@@ -251,7 +275,6 @@ export class CorteCajaComponent implements OnInit {
     doc.setFontSize(9);
     doc.setFont('helvetica', 'normal');
     doc.text(`Turno ID: #${corte.id}`, 10, 32);
-    // Agregamos un respaldo visual por si consultas cortes muy viejos que eran null
     doc.text(
       `Fecha: ${corte.fecha || new Date().toISOString().split('T')[0]}`,
       10,
@@ -262,97 +285,101 @@ export class CorteCajaComponent implements OnInit {
       align: 'center',
     });
 
-    // --- DESGLOSE DE INGRESOS ---
-    doc.text('VENTAS EFECTIVO:', 10, 50);
-    doc.text(`$${corte.totalEfectivo.toFixed(2)}`, 70, 50, { align: 'right' });
+    // --- DESGLOSE DE INGRESOS (Coordenadas Y corregidas) ---
+    let y = 50;
 
-    doc.text('VENTAS TARJETA:', 10, 56);
-    doc.text(`$${corte.totalTarjeta.toFixed(2)}`, 70, 56, { align: 'right' });
+    doc.text('VENTAS EFECTIVO:', 10, y);
+    doc.text(`$${formatMonto(corte.totalEfectivo)}`, 70, y, { align: 'right' });
+    y += 6;
 
-    doc.text('VENTAS TRANSFERENCIA:', 10, 62);
-    doc.text(`$${(corte.totalTransferencias || 0).toFixed(2)}`, 70, 62, {
+    doc.text('MERCADO PAGO:', 10, y);
+    doc.text(`$${formatMonto(corte.totalTarjetaMercadoPago)}`, 70, y, {
       align: 'right',
     });
+    y += 6;
 
-    doc.text('PROPINAS REGISTRADAS:', 10, 68);
-    doc.text(`$${corte.totalPropinas.toFixed(2)}`, 70, 68, { align: 'right' });
+    doc.text('TARJETA BBVA:', 10, y);
+    doc.text(`$${formatMonto(corte.totalTarjetaBBVA)}`, 70, y, {
+      align: 'right',
+    });
+    y += 6;
 
-    doc.text('RETIROS / GASTOS:', 10, 74);
-    doc.text(`-$${(corte.gastos || 0).toFixed(2)}`, 70, 74, { align: 'right' });
+    doc.text('TRANSFERENCIAS:', 10, y);
+    doc.text(`$${formatMonto(corte.totalTransferencias)}`, 70, y, {
+      align: 'right',
+    });
+    y += 6;
 
-    // Usamos una variable dinámica para no encimar los textos
-    let currentY = 80;
+    doc.text('PROPINAS REGISTRADAS:', 10, y);
+    doc.text(`$${formatMonto(corte.totalPropinas)}`, 70, y, { align: 'right' });
+    y += 6;
+
+    doc.text('RETIROS / GASTOS:', 10, y);
+    doc.text(`-$${formatMonto(corte.gastos)}`, 70, y, { align: 'right' });
+    y += 6;
 
     if (corte.detalleGastos) {
       doc.setFontSize(8);
       doc.setFont('helvetica', 'italic');
-      // Imprime el motivo dinámicamente
-      doc.text(`Motivo: ${corte.detalleGastos}`, 10, currentY);
+      doc.text(`Motivo: ${corte.detalleGastos}`, 10, y);
       doc.setFontSize(9);
       doc.setFont('helvetica', 'normal');
-      currentY += 6; // Empuja la siguiente línea hacia abajo
+      y += 6;
     }
 
-    doc.text(
-      '--------------------------------------------------',
-      40,
-      currentY,
-      { align: 'center' },
-    );
-    currentY += 6;
+    doc.text('--------------------------------------------------', 40, y, {
+      align: 'center',
+    });
+    y += 6;
 
     // --- TOTALES ---
     doc.setFont('helvetica', 'bold');
-    doc.text('GRAN TOTAL DEL TURNO:', 10, currentY);
-    doc.text(`$${corte.granTotal.toFixed(2)}`, 70, currentY, {
-      align: 'right',
-    });
+    doc.text('GRAN TOTAL DEL TURNO:', 10, y);
+    doc.text(`$${formatMonto(corte.granTotal)}`, 70, y, { align: 'right' });
+    y += 6;
 
-    currentY += 6;
     doc.setFont('helvetica', 'normal');
-    doc.text(
-      '--------------------------------------------------',
-      40,
-      currentY,
-      { align: 'center' },
-    );
+    doc.text('--------------------------------------------------', 40, y, {
+      align: 'center',
+    });
+    y += 8;
 
-    currentY += 8;
     // --- AUDITORÍA Y FIRMA ---
-    doc.text('FALTANTE / SOBRANTE:', 10, currentY);
+    doc.text('FALTANTE / SOBRANTE:', 10, y);
+    y += 6;
 
-    currentY += 6;
     doc.setFont('helvetica', 'bold');
+    const dif = Number(corte.diferencia) || 0;
     const textoDiferencia =
-      corte.diferencia > 0
-        ? `+$${corte.diferencia.toFixed(2)}`
-        : `-$${Math.abs(corte.diferencia).toFixed(2)}`;
-    doc.text(textoDiferencia, 70, currentY, { align: 'right' });
+      dif >= 0 ? `+$${dif.toFixed(2)}` : `-$${Math.abs(dif).toFixed(2)}`;
+    doc.text(textoDiferencia, 70, y, { align: 'right' });
 
-    currentY += 20;
-    // Espacio para la firma física
+    y += 20;
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(8);
-    doc.text('_______________________', 40, currentY, { align: 'center' });
-
-    currentY += 5;
-    doc.text('Firma del Cajero', 40, currentY, { align: 'center' });
+    doc.text('_______________________', 40, y, { align: 'center' });
+    y += 5;
+    doc.text('Firma del Cajero', 40, y, { align: 'center' });
 
     // --- ABRIR Y MANDAR A IMPRIMIR AUTOMÁTICAMENTE ---
     doc.autoPrint();
     window.open(doc.output('bloburl'), '_blank');
   }
-
+  
   verDetalleVentas(cierreId: number): void {
     // Si ya está abierto, lo cerramos
     if (this.corteSeleccionadoId === cierreId) {
       this.corteSeleccionadoId = null;
       return;
     }
-
     this.corteSeleccionadoId = cierreId;
     this.service.getArticulosVendidosPorCorte(cierreId).subscribe({
-      next: (data) => (this.articulosVendidos = data),
+      next: (data) => {
+        // ORDENAMIENTO DE MAYOR A MENOR TICKET (#)
+        this.articulosVendidos = data.sort(
+          (a, b) => Number(b.pedidoId) - Number(a.pedidoId),
+        );
+      },
       error: (err) => console.error('Error al cargar artículos', err),
     });
   }

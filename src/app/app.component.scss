@@ -2,3 +2,9 @@
 .example {
     color: var(--background)
 }
+
+.navbar.sticky-top {
+  position: sticky;
+  top: 0;
+  z-index: 1030; /* Garantiza que flote sobre las tablas y cards */
+}

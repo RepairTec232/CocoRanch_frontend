@@ -222,4 +222,17 @@ cargarOrden(): void {
       },
     });
   }
+
+  get nombreCortoCliente(): string {
+    if (this.ordenActiva?.mesa) return "Mesa " + this.ordenActiva.mesa.numero;
+    if (this.ordenActiva?.clienteExterno) return this.ordenActiva.clienteExterno.split(' | ')[0];
+    return "Pedido Externo";
+  }
+
+  get infoExtraCliente(): string {
+    if (this.ordenActiva?.clienteExterno && this.ordenActiva.clienteExterno.includes(' | ')) {
+      return this.ordenActiva.clienteExterno.substring(this.ordenActiva.clienteExterno.indexOf(' | ') + 3);
+    }
+    return '';
+  }
 }

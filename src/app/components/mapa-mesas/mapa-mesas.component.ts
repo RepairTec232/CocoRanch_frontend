@@ -7,6 +7,7 @@ import { PedidoExterno } from '../../models/pedido.model';
 import { FormsModule } from '@angular/forms';
 import { PedidoExternoService } from '../../services/pedido-externo.service';
 import { ProductoService, Producto } from '../../services/producto.service';
+import { ClienteService } from '../../services/cliente.service';
 
 @Component({
   selector: 'app-mapa-mesas',
@@ -32,11 +33,18 @@ export class MapaMesasComponent implements OnInit {
   modoEdicion: boolean = false;
   pedidoEditandoId: number | null = null;
 
+  terminoBusquedaCliente: string = '';
+  clientesSugeridos: any[] = [];
+  clienteSeleccionado: any = null;
+  mostrarFormCliente: boolean = false;
+  clienteForm: any = {};
+
   constructor(
     private service: RestauranteService,
     private router: Router,
     private pedidoExternoService: PedidoExternoService,
     private productoService: ProductoService,
+    private clienteService: ClienteService,
   ) {}
 
   ngOnInit(): void {
@@ -102,6 +110,9 @@ export class MapaMesasComponent implements OnInit {
     this.platillosSeleccionados = [];
     this.productoActualId = null;
     this.cantidadActual = 1;
+    this.clienteSeleccionado = null;
+    this.mostrarFormCliente = false;
+    this.terminoBusquedaCliente = '';
   }
 
   abrirEditarPedido(pedido: PedidoExterno): void {
@@ -111,6 +122,14 @@ export class MapaMesasComponent implements OnInit {
     this.platillosSeleccionados = [];
     this.productoActualId = null;
     this.cantidadActual = 1;
+
+    if (pedido.telefono) {
+      this.clienteService.buscarClientes(pedido.telefono).subscribe((data) => {
+        if (data && data.length > 0) {
+          this.clienteSeleccionado = data[0];
+        }
+      });
+    }
 
     // Reconstruir el carrito leyendo la propiedad 'pedido' ("ID,CANTIDAD,PRECIO|...")
     if (pedido.pedido) {
@@ -217,7 +236,7 @@ export class MapaMesasComponent implements OnInit {
       });
     }
   }
-  
+
   private inicializarPedido(): PedidoExterno {
     return {
       fecha: new Date(),
@@ -309,6 +328,91 @@ export class MapaMesasComponent implements OnInit {
           );
         },
       });
+    }
+  }
+
+  buscarCliente(): void {
+    const termino = this.terminoBusquedaCliente.trim();
+    if (termino.length === 0) {
+      this.clientesSugeridos = [];
+      return;
+    }
+    this.clienteService.buscarClientes(termino).subscribe({
+      next: (data) => (this.clientesSugeridos = data),
+      error: (err) => console.error('Error buscando clientes', err),
+    });
+  }
+
+  seleccionarCliente(cliente: any): void {
+    this.clienteSeleccionado = { ...cliente };
+    this.clientesSugeridos = [];
+    this.terminoBusquedaCliente = '';
+    this.mostrarFormCliente = false;
+    // Asociar al pedido
+    this.nuevoPedido.cliente =
+      cliente.nombre + (cliente.apellido ? ' ' + cliente.apellido : '');
+    this.nuevoPedido.telefono = cliente.telefono;
+  }
+
+  prepararNuevoCliente(): void {
+    this.clienteSeleccionado = null;
+    this.clienteForm = {
+      nombre: '',
+      apellido: '',
+      telefono: '',
+      domicilio: '',
+      referenciaDomicilio: '',
+      alergias: '',
+    };
+    this.mostrarFormCliente = true;
+    this.clientesSugeridos = [];
+  }
+
+  editarClienteActivo(): void {
+    this.clienteForm = { ...this.clienteSeleccionado };
+    this.mostrarFormCliente = true;
+  }
+
+  guardarClienteBD(): void {
+    if (!this.clienteForm.nombre || !this.clienteForm.telefono) {
+      alert('El nombre y el teléfono son obligatorios.');
+      return;
+    }
+
+    // Si no es pedido para llevar, limpiamos los campos de domicilio por consistencia
+    if (this.nuevoPedido.tipo !== 'Para llevar') {
+      this.clienteForm.domicilio = '';
+      this.clienteForm.referenciaDomicilio = '';
+    }
+
+    this.clienteService.guardarCliente(this.clienteForm).subscribe({
+      next: (res) => {
+        this.seleccionarCliente(res);
+        alert('Cliente registrado correctamente.');
+      },
+      error: (err) =>
+        alert(
+          err.error?.message ||
+            'Error al guardar el cliente en la base de datos.',
+        ),
+    });
+  }
+  eliminarClienteActivo(): void {
+    if (
+      this.clienteSeleccionado?.id &&
+      confirm('¿Eliminar este cliente de la base de datos?')
+    ) {
+      this.clienteService
+        .eliminarCliente(this.clienteSeleccionado.id)
+        .subscribe({
+          next: () => {
+            this.clienteSeleccionado = null;
+            this.nuevoPedido.cliente = '';
+            this.nuevoPedido.telefono = '';
+            alert('Cliente eliminado.');
+          },
+          error: (err) => console.error(err),
+        });
     }
   }
 }

@@ -5,12 +5,18 @@
         <div class="card-header bg-secondary text-white p-3">
           <h5 class="mb-0">
             <i class="bi bi-receipt-cutoff"></i> Resumen -
-            {{
-              ordenActiva.mesa
-                ? "Mesa " + ordenActiva.mesa.numero
-                : ordenActiva.clienteExterno || "Pedido Externo"
-            }}
+            {{ nombreCortoCliente }}
           </h5>
+        </div>
+
+        <div
+          *ngIf="infoExtraCliente"
+          class="bg-light px-3 py-2 border-bottom border-warning"
+        >
+          <small class="text-muted"
+            ><i class="bi bi-info-circle-fill text-warning me-1"></i>
+            {{ infoExtraCliente }}</small
+          >
         </div>
 
         <div class="card-body p-0" style="max-height: 350px; overflow-y: auto">
@@ -70,54 +76,74 @@
 
         <div class="card-body p-4">
           <h6 class="text-muted mb-3">1. Selecciona Método de Pago</h6>
-
           <div class="row g-3 mb-4">
-            <!-- BOTÓN EFECTIVO -->
-            <div class="col-4">
-              <button
-                class="btn w-100 py-3 d-flex flex-column align-items-center justify-content-center gap-2"
-                [ngClass]="
-                  metodoPago === 'EFECTIVO'
-                    ? 'btn-success'
-                    : 'btn-outline-success'
-                "
+            <!-- EFECTIVO -->
+            <div class="col-md-3">
+              <div
+                class="card h-100 text-center p-3 cursor-pointer shadow-sm card-hover border-2"
+                [ngClass]="{
+                  'border-success bg-success bg-opacity-10 text-success fw-bold':
+                    metodoPago === 'EFECTIVO',
+                  'border-light text-muted': metodoPago !== 'EFECTIVO',
+                }"
                 (click)="metodoPago = 'EFECTIVO'"
+                style="cursor: pointer"
               >
-                <i class="bi bi-cash-coin fs-2"></i>
-                <span class="fw-bold">Efectivo</span>
-              </button>
+                <i class="bi bi-cash-stack fs-1 mb-2"></i>
+                <span class="d-block small">Efectivo</span>
+              </div>
             </div>
 
-            <!-- BOTÓN TARJETA -->
-            <div class="col-4">
-              <button
-                class="btn w-100 py-3 d-flex flex-column align-items-center justify-content-center gap-2"
-                [ngClass]="
-                  metodoPago === 'TARJETA'
-                    ? 'btn-info text-white'
-                    : 'btn-outline-info'
-                "
-                (click)="metodoPago = 'TARJETA'"
+            <!-- MERCADO PAGO -->
+            <div class="col-md-3">
+              <div
+                class="card h-100 text-center p-3 cursor-pointer shadow-sm card-hover border-2"
+                [ngClass]="{
+                  'border-primary bg-primary bg-opacity-10 text-primary fw-bold':
+                    metodoPago === 'TARJETA_MERCADO_PAGO',
+                  'border-light text-muted':
+                    metodoPago !== 'TARJETA_MERCADO_PAGO',
+                }"
+                (click)="metodoPago = 'TARJETA_MERCADO_PAGO'"
+                style="cursor: pointer"
               >
-                <i class="bi bi-credit-card fs-2"></i>
-                <span class="fw-bold">Tarjeta</span>
-              </button>
+                <i class="bi bi-credit-card-2-front-fill fs-1 mb-2"></i>
+                <span class="d-block small">Mercado Pago</span>
+              </div>
             </div>
 
-            <!-- NUEVO: BOTÓN TRANSFERENCIA -->
-            <div class="col-4">
-              <button
-                class="btn w-100 py-3 d-flex flex-column align-items-center justify-content-center gap-2"
-                [ngClass]="
-                  metodoPago === 'TRANSFERENCIA'
-                    ? 'btn-primary text-white'
-                    : 'btn-outline-primary'
-                "
+            <!-- BBVA -->
+            <div class="col-md-3">
+              <div
+                class="card h-100 text-center p-3 cursor-pointer shadow-sm card-hover border-2"
+                [ngClass]="{
+                  'border-info bg-info bg-opacity-10 text-info fw-bold':
+                    metodoPago === 'TARJETA_BBVA',
+                  'border-light text-muted': metodoPago !== 'TARJETA_BBVA',
+                }"
+                (click)="metodoPago = 'TARJETA_BBVA'"
+                style="cursor: pointer"
+              >
+                <i class="bi bi-bank fs-1 mb-2"></i>
+                <span class="d-block small">BBVA</span>
+              </div>
+            </div>
+
+            <!-- TRANSFERENCIA -->
+            <div class="col-md-3">
+              <div
+                class="card h-100 text-center p-3 cursor-pointer shadow-sm card-hover border-2"
+                [ngClass]="{
+                  'border-warning bg-warning bg-opacity-10 text-dark fw-bold':
+                    metodoPago === 'TRANSFERENCIA',
+                  'border-light text-muted': metodoPago !== 'TRANSFERENCIA',
+                }"
                 (click)="metodoPago = 'TRANSFERENCIA'"
+                style="cursor: pointer"
               >
-                <i class="bi bi-bank fs-2"></i>
-                <span class="fw-bold text-wrap">Transferencia</span>
-              </button>
+                <i class="bi bi-arrow-left-right fs-1 mb-2"></i>
+                <span class="d-block small">Transferencia</span>
+              </div>
             </div>
           </div>
 
